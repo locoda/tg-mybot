@@ -64,6 +64,7 @@ function getXhsData(url) {
     headers: {
       "User-Agent": xhsUA,
     },
+    // Stop redirect, we need cookie in second reqeust
     followRedirects: false,
   };
   var response = UrlFetchApp.fetch(url, options);
@@ -76,8 +77,10 @@ function getXhsData(url) {
   };
   var response = UrlFetchApp.fetch(url, options);
   var html = response.getContentText();
+  // data in plain html
   var data = html.split("window.__INITIAL_SSR_STATE__=")[1];
   data = data.split("</script>")[0].replace("undefined", '"undefined"');
+  // return main note information only
   return JSON.parse(data).NoteView.noteInfo;
 }
 
@@ -94,6 +97,7 @@ function getXhsCaption(data) {
 }
 
 function sendXhsFinal(msg, data, caption, extra_caption) {
+  //Try to send cover photo
   try {
     sendPhoto({
         chat_id: msg.chat.id,
@@ -114,6 +118,7 @@ function sendXhsFinal(msg, data, caption, extra_caption) {
       });
   } catch (error) {
     console.error(error);
+    // Try cover photo without params again
     try {
     sendPhoto({
         chat_id: msg.chat.id,
@@ -133,6 +138,7 @@ function sendXhsFinal(msg, data, caption, extra_caption) {
         },
       });
     } catch (error) {
+      // Cannot success, we send plain text
       console.error(error);
       if (!extra_caption) {
         extra_caption = '\n_⬇️（图片获取失败，请原文查看）_'

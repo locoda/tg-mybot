@@ -1,10 +1,23 @@
 function fetch(msg) {
+  // Check if the message is a reply, if it is, include the replied message
   if (msg.hasOwnProperty("reply_to_message")) {
     var text = msg.text + " " + msg.reply_to_message.text;
   } else {
     var text = msg.text;
   }
-  var url = getUrlFromText(text);
+  // Try to get URL from the plain text  
+  try { 
+    var url = getUrlFromText(text);
+  } catch(error) {
+    console.error(error);
+    sendMessage({
+      chat_id: msg.chat.id,
+      text: "消息内无链接",
+      reply_to_message_id: msg.message_id,
+    });
+    return;
+  }
+  // Check URL and decide process method
   if (url.includes("m.weibo.cn") || url.includes("weibo.com")) {
     var url = getUrlFromText(text);
     url = url.replace('weibo.com', 'm.weibo.cn');
@@ -44,6 +57,7 @@ function fetch(msg) {
       return;
     }
   } else {
+    // No URL is valid for fetch
     sendMessage({
       chat_id: msg.chat.id,
       text: "无可用链接",

@@ -11,7 +11,7 @@ function fetch(msg) {
     try {
       processWeibo(msg, url);
     } catch (error) {
-      Logger.log(error);
+      console.error(error);
       sendMessage({
         chat_id: msg.chat.id,
         text: "微博获取出错啦",
@@ -23,7 +23,7 @@ function fetch(msg) {
      try {
       processXhs(msg, url);
     } catch (error) {
-      Logger.log(error);
+      console.error(error);
       sendMessage({
         chat_id: msg.chat.id,
         text: "小红书获取出错啦",
@@ -31,11 +31,11 @@ function fetch(msg) {
       });
       return;
     }
-  } else if (url.includes('bbs.nga.cn') || url.includes('nga.178.com')) {
+  } else if (url.includes('bbs.nga.cn') || url.includes('nga.178.com') || url.includes('ngabbs.com')) {
     try {
       processNga(msg, url);
     } catch (error) {
-      Logger.log(error);
+      console.error(error);
       sendMessage({
         chat_id: msg.chat.id,
         text: "NGA获取出错啦",

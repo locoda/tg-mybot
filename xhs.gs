@@ -1,6 +1,9 @@
+const paramReg = /\?.*/g
+
 function processXhs(msg, url) {
   var data = getXhsData(url);
   var caption = getXhsCaption(data);
+  Logger.log(JSON.stringify(data));
   if (xhsCheckSendVideo(data)) {
     try {
       sendVideo({
@@ -21,43 +24,12 @@ function processXhs(msg, url) {
         },
       });
     } catch {
-      sendPhoto({
-        chat_id: msg.chat.id,
-        caption: caption + '\n _⬇️（视频获取失败，请原文查看）_',
-        parse_mode: "MarkdownV2",
-        photo: "https:" + data.cover.url,
-        reply_to_message_id: msg.message_id,
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: "原文链接",
-                url: "https://www.xiaohongshu.com/discovery/item/" + data.id,
-              },
-            ],
-          ],
-        },
-      });
+      sendXhsFinal(msg, data, caption, '\n_⬇️（视频获取失败，请原文查看）_');
     }
   } else if (xhsCheckSendOne(data)) {
-    sendPhoto({
-      chat_id: msg.chat.id,
-      caption: caption,
-      parse_mode: "MarkdownV2",
-      photo: "https:" + data.cover.url,
-      reply_to_message_id: msg.message_id,
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "原文链接",
-              url: "https://www.xiaohongshu.com/discovery/item/" + data.id,
-            },
-          ],
-        ],
-      },
-    });
+    sendXhsFinal(msg, data, caption, '');  
   } else {
+    try {
     var media_data = [];
     data.imageList.forEach((img) =>
       media_data.push({
@@ -67,18 +39,23 @@ function processXhs(msg, url) {
     );
     media_data[0].caption =
       caption +
-      "\n[🔗原文链接](https://www.xiaohongshu.com/discovery/item/" +
+      "[🔗原文链接](https://www.xiaohongshu.com/discovery/item/" +
       data.id +
       ")";
     media_data[0].parse_mode = "MarkdownV2";
     if (media_data.length > 10) {
       media_data = media_data.slice(0, 10);
     }
+    Logger.log(media_data);
     sendMediaGroup({
       chat_id: msg.chat.id,
       media: media_data,
       reply_to_message_id: msg.message_id,
     });
+    } catch (error) {
+      console.error(error);
+      sendXhsFinal(msg, data, caption, '\n_⬇️（多图获取失败，请原文查看）_');
+    }
   }
 }
 
@@ -113,5 +90,69 @@ function xhsCheckSendOne(data) {
 }
 
 function getXhsCaption(data) {
-  return "*" + cleanMarkdown(data.title) + "*\n" + cleanMarkdown(data.desc);
+  return "*" + cleanMarkdown(data.title) + "*\n\n" + cleanMarkdown(data.desc);
+}
+
+function sendXhsFinal(msg, data, caption, extra_caption) {
+  try {
+    sendPhoto({
+        chat_id: msg.chat.id,
+        caption: caption + extra_caption,
+        parse_mode: "MarkdownV2",
+        photo: "https:" + data.cover.url,
+        reply_to_message_id: msg.message_id,
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: "原文链接",
+                url: "https://www.xiaohongshu.com/discovery/item/" + data.id,
+              },
+            ],
+          ],
+        },
+      });
+  } catch (error) {
+    console.error(error);
+    try {
+    sendPhoto({
+        chat_id: msg.chat.id,
+        caption: caption + extra_caption,
+        photo: "https:" + data.cover.url.replace(paramReg, ''),
+        parse_mode: "MarkdownV2",
+        reply_to_message_id: msg.message_id,
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: "原文链接",
+                url: "https://www.xiaohongshu.com/discovery/item/" + data.id,
+              },
+            ],
+          ],
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      if (!extra_caption) {
+        extra_caption = '\n_⬇️（图片获取失败，请原文查看）_'
+      }
+      sendMessage({
+          chat_id: msg.chat.id,
+          text: caption + extra_caption,
+          parse_mode: "MarkdownV2",
+          reply_to_message_id: msg.message_id,
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: "原文链接",
+                  url: "https://www.xiaohongshu.com/discovery/item/" + data.id,
+                },
+              ],
+            ],
+          },
+        });
+    }
+  }
 }

@@ -11,7 +11,6 @@ function processNga(msg, url) {
   if (checkNgaImgExist(content)) {
     const imgReg = /\[img\].*/g;
     var imgs = getNgaImagesFromText(content);
-    Logger.log(imgs);
     content = content.replaceAll(imgReg, "");
     if (imgs.length == 1) {
       sendPhoto({

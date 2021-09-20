@@ -18,6 +18,11 @@ function sendAnimation(data) {
   Logger.log(result);
 }
 
+function sendAudio(data) {
+  var result = request('sendAudio', data);
+  Logger.log(result);
+}
+
 function sendMediaGroup(data) {
   var result = request('sendMediaGroup', data);
   Logger.log(result);

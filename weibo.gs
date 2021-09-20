@@ -1,4 +1,5 @@
 function processWeibo(msg, url) {
+  url = parseWeiboUrl(url);
   var options = {
     headers: {
       "User-Agent":
@@ -50,6 +51,18 @@ function processWeibo(msg, url) {
       reply_to_message_id: msg.message_id,
     });
     return;
+  }
+}
+
+function parseWeiboUrl(url) {
+  Logger.log(url)
+  if (url.includes('m.weibo.cn')) {
+    return url;
+  } else if (url.includes('weibo.com')){
+    return url.replace('weibo.com', 'm.weibo.cn')
+  } else if (url.includes('share.api.weibo.cn')) {
+    var id = url.split('weibo_id=')[1];
+    return 'https://m.weibo.cn/status/'+id;
   }
 }
 

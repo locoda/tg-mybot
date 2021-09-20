@@ -19,8 +19,6 @@ function fetch(msg) {
   }
   // Check URL and decide process method
   if (url.includes("m.weibo.cn") || url.includes("weibo.com")) {
-    var url = getUrlFromText(text);
-    url = url.replace('weibo.com', 'm.weibo.cn');
     try {
       processWeibo(msg, url);
     } catch (error) {

@@ -24,7 +24,7 @@ function processXhs(msg, url) {
         },
       });
     } catch {
-      sendXhsFinal(msg, data, caption, '\n_⬇️（视频获取失败，请原文查看）_');
+      sendXhsFinal(msg, data, caption, '\n\n_⬇️（视频获取失败，请原文查看）_');
     }
   } else if (xhsCheckSendOne(data)) {
     sendXhsFinal(msg, data, caption, '');  
@@ -39,7 +39,7 @@ function processXhs(msg, url) {
     );
     media_data[0].caption =
       caption +
-      "[🔗原文链接](https://www.xiaohongshu.com/discovery/item/" +
+      "\n\n[🔗原文链接](https://www.xiaohongshu.com/discovery/item/" +
       data.id +
       ")";
     media_data[0].parse_mode = "MarkdownV2";
@@ -54,7 +54,7 @@ function processXhs(msg, url) {
     });
     } catch (error) {
       console.error(error);
-      sendXhsFinal(msg, data, caption, '\n_⬇️（多图获取失败，请原文查看）_');
+      sendXhsFinal(msg, data, caption, '\n\n_⬇️（多图获取失败，请原文查看）_');
     }
   }
 }
@@ -141,7 +141,7 @@ function sendXhsFinal(msg, data, caption, extra_caption) {
       // Cannot success, we send plain text
       console.error(error);
       if (!extra_caption) {
-        extra_caption = '\n_⬇️（图片获取失败，请原文查看）_'
+        extra_caption = '\n\n_⬇️（图片获取失败，请原文查看）_'
       }
       sendMessage({
           chat_id: msg.chat.id,

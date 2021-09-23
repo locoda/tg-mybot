@@ -1,69 +1,61 @@
 function sendMessage(data) {
-  var result = request('sendMessage', data);
-  Logger.log(result);
+  request('sendMessage', data);
 }
 
 function sendPhoto(data) {
-  var result = request('sendPhoto', data);
-  Logger.log(result);
+  request('sendPhoto', data);
 }
 
 function sendVideo(data) {
-  var result = request('sendVideo', data);
-  Logger.log(result);
+  request('sendVideo', data);
+}
+
+function sendVideoFile(data) {
+  requestFile('sendVideo', data);
 }
 
 function sendAnimation(data) {
-  var result = request('sendAnimation', data);
-  Logger.log(result);
+  request('sendAnimation', data);
 }
 
 function sendAudio(data) {
-  var result = request('sendAudio', data);
-  Logger.log(result);
+  request('sendAudio', data);
 }
 
 function sendMediaGroup(data) {
-  var result = request('sendMediaGroup', data);
-  Logger.log(result);
+  request('sendMediaGroup', data);
 }
 
 function sendDocument(data) {
-  var result = request('sendDocument', data);
-  Logger.log(result);
+  request('sendDocument', data);
 }
 
 function getMyCommands() {
-  var result = request('getMyCommands');
-  Logger.log(result);
+  request('getMyCommands');
 }
 
 function getWebhookInfo() {
-  var result = request('getWebhookInfo');
-  Logger.log(result);
+  request('getWebhookInfo');
 }
 
 function setWebhook() {
-  var result = request('setWebhook', {
+  request('setWebhook', {
     url: telegramWebhookUrl,
   });
-  Logger.log(result);
 }
 
 function deleteWebhook() {
-  var result = request('deleteWebhook', {
+  request('deleteWebhook', {
     drop_pending_updates: true
   });
-  Logger.log(result);
 }
 
-
 function getUpdates() {
-  var result = request('getUpdates');
-  Logger.log(result);
+  request('getUpdates');
 }
 
 function request(api, data) {
+  console.log(data);
   var options = {
     'method' : 'post',
     'contentType': 'application/json',
@@ -71,7 +63,23 @@ function request(api, data) {
   };
   var response = UrlFetchApp.fetch(telegramUrl + api, options);
   if (response.getResponseCode() == 200) {
-    return JSON.parse(response.getContentText());
+    var result = JSON.parse(response.getContentText())
+    console.log(result)
+    return result;
+  }
+  return false;
+}
+
+function requestFile(api, data) {
+  var options = {
+    'method' : 'post',
+    'payload' : data,
+  };
+  var response = UrlFetchApp.fetch(telegramUrl + api, options);
+  if (response.getResponseCode() == 200) {
+    var result = JSON.parse(response.getContentText())
+    console.log(result)
+    return result;
   }
   return false;
 }

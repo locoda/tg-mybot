@@ -62,7 +62,7 @@ function processXhs(msg, url) {
 function getXhsData(url) {
   var options = {
     headers: {
-      "User-Agent": xhsUA,
+      "User-Agent": macChromeUserAgent,
     },
     // Stop redirect, we need cookie in second reqeust
     followRedirects: false,
@@ -72,7 +72,7 @@ function getXhsData(url) {
   options = {
     headers: {
       cookie: xhsCookie,
-      "User-Agent": xhsUA,
+      "User-Agent": macChromeUserAgent,
     },
   };
   var response = UrlFetchApp.fetch(url, options);

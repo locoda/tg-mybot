@@ -1,5 +1,6 @@
 function doGet(e) {
-  return HtmlService.createHtmlOutput('乙醚的替身使者');
+  // return HtmlService.createHtmlOutput('乙醚的替身使者');
+  return HtmlService.createHtmlOutputFromFile('index');
 }
 
 function doPost(e) {

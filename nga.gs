@@ -1,7 +1,7 @@
 function processNga(msg, url) {
   var options = {
     headers: {
-      "User-Agent": ngaUA,
+      "User-Agent": macChromeUserAgent,
       Cookie: ngaCookie,
     },
   };

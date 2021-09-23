@@ -18,7 +18,7 @@ function fetch(msg) {
     return;
   }
   // Check URL and decide process method
-  if (url.includes("m.weibo.cn") || url.includes("weibo.com")) {
+  if (url.includes("m.weibo.cn") || url.includes("weibo.com") || url.includes("share.api.weibo.cn")) {
     try {
       processWeibo(msg, url);
     } catch (error) {
@@ -50,6 +50,18 @@ function fetch(msg) {
       sendMessage({
         chat_id: msg.chat.id,
         text: "NGA获取出错啦",
+        reply_to_message_id: msg.message_id,
+      });
+      return;
+    }
+  } else if (url.includes('vm.tiktok.com')) {
+    try {
+      processTiktok(msg, url);
+    } catch (error) {
+      console.error(error);
+      sendMessage({
+        chat_id: msg.chat.id,
+        text: "TikTok获取出错啦",
         reply_to_message_id: msg.message_id,
       });
       return;

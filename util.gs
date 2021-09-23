@@ -4,9 +4,11 @@ function getUrlFromText(text) {
   return url;
 }
 
-const markdownChar = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
+const markdownChar = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!', ];
 
 function cleanMarkdown(text) {
   markdownChar.forEach(ch => text = text.replaceAll(ch, '\\'+ch));
   return text;
 }
+
+const line = '\n\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\n'

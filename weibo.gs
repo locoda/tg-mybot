@@ -2,8 +2,7 @@ function processWeibo(msg, url) {
   url = parseWeiboUrl(url);
   var options = {
     headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36",
+      "User-Agent": macChromeUserAgent,
     },
   };
   var response = UrlFetchApp.fetch(url, options);
@@ -12,24 +11,48 @@ function processWeibo(msg, url) {
     var data = html.split("$render_data = ")[1];
     var data = data.split("[0]")[0];
     var data = JSON.parse(data)[0];
-    var caption = constructWeiboText(data);
+    var caption = constructWeiboCaption(data);
     if (checkWeiboHasPhoto(data)) {
       photo_data = getWeiboPhoto(data);
       sendWeiboPhoto(msg, photo_data, caption, url);
     } else if (checkWeiboHasVideo(data, caption)) {
-      sendVideo({
-        chat_id: msg.chat.id,
-        caption: caption,
-        parse_mode: 'MarkdownV2',
-        video: getWeiboVideo(data),
-        reply_to_message_id: msg.message_id,
-        reply_markup: {
-          inline_keyboard: [[{
-            text: "原文链接",
-            url: url,
-          }]],
-        },
-      });
+      try {
+        sendVideo({
+          chat_id: msg.chat.id,
+          caption: caption,
+          parse_mode: 'MarkdownV2',
+          video: getWeiboVideo(data),
+          reply_to_message_id: msg.message_id,
+          reply_markup: {
+            inline_keyboard: [[{
+              text: "原文链接",
+              url: url,
+            }]],
+          },
+        });
+      } catch (error) {
+        console.error(error);
+        try {
+          var response = UrlFetchApp.fetch(getWeiboVideo(data), options);
+            // console.log(response.getAllHeaders().Location);
+            sendVideoFile({
+              chat_id: msg.chat.id,
+              caption: caption,
+              parse_mode: 'MarkdownV2',
+              video: response.getBlob(),
+              reply_to_message_id: msg.message_id,
+              reply_markup: JSON.stringify({
+                inline_keyboard: [[{
+                  text: "原文链接",
+                  url: url,
+                }]],
+              }),
+            });  
+        } catch (error) {
+          console.error(error);
+          sendWeiboFinal(msg, data, url, caption,'\n\n_⬇️（视频获取失败，请原文查看）_');
+        }
+      }
     } else {
       sendMessage({
         chat_id: msg.chat.id,
@@ -47,7 +70,7 @@ function processWeibo(msg, url) {
   } else {
     sendMessage({
       chat_id: msg.chat.id,
-      text: "获取出错啦",
+      text: "微博读取出错啦",
       reply_to_message_id: msg.message_id,
     });
     return;
@@ -55,7 +78,6 @@ function processWeibo(msg, url) {
 }
 
 function parseWeiboUrl(url) {
-  Logger.log(url)
   if (url.includes('m.weibo.cn')) {
     return url;
   } else if (url.includes('weibo.com')){
@@ -66,9 +88,10 @@ function parseWeiboUrl(url) {
   }
 }
 
-function constructWeiboText(data) {
+function constructWeiboCaption(data) {
+  var text = data.status.text.replaceAll('<br />', '\n')
   const htmlTags = new RegExp("<[^>]*>", "g");
-  const text = data.status.text.replace(htmlTags, "");
+  text = text.replaceAll(htmlTags, "");
   if (data.status.hasOwnProperty("retweeted_status")) {
     const retweeted_text = data.status.retweeted_status.text.replace(
       htmlTags,
@@ -79,13 +102,14 @@ function constructWeiboText(data) {
       cleanMarkdown(data.status.user.screen_name) +
       ": " +
       cleanMarkdown(text) +
-      "*//@" +
+      line + 
+      "//@" +
       cleanMarkdown(data.status.retweeted_status.user.screen_name) +
       ": " +
-      cleanMarkdown(retweeted_text) + '*'
+      cleanMarkdown(retweeted_text)
     );
   } else {
-    var caption = "@" + data.status.user.screen_name + ": " + cleanMarkdown(text);
+    var caption = "@" + cleanMarkdown(data.status.user.screen_name) + ": " + cleanMarkdown(text);
   }
   return caption;
 }
@@ -122,22 +146,22 @@ function sendWeiboPhoto(msg, data, caption, url) {
     })
   );
   if (checkWeiboSendOne(media_data)) {
-    sendWeiboPhotoOne(msg, media_data[0], caption, url);
+    if (media_data.length === 1) {
+      sendWeiboPhotoOne(msg, media_data[0], caption, url);
+    } else if (media_data[0].type === 'document') {
+      media_data.forEach((media) => media.type = "document");
+      sendWeiboPhotoMultiple(msg, media_data, caption, url )
+    } else {
+      sendWeiboPhotoOne(msg, media_data[0], caption + '\n\n_⬇️（动图多图仅显示第一张，请原文查看）_', url);
+    }
   } else {
     media_data = media_data.filter((media) => media.type === "photo");
-    media_data[0].caption = caption + "\n[🔗原文链接](" + url + ")";
-    media_data[0].parse_mode= 'MarkdownV2';
     if (checkWeiboSendOne(media_data)) {
       sendWeiboPhotoOne(msg, media_data[0], caption, url);
+    } else {
+      sendWeiboPhotoMultiple(msg, media_data, caption, url )
     }
-    if (media_data.length > 10) {
-      media_data = media_data.slice(0, 10);
-    }
-    sendMediaGroup({
-      chat_id: msg.chat.id,
-      media: media_data,
-      reply_to_message_id: msg.message_id,
-    });
+    
   }
 }
 
@@ -205,6 +229,29 @@ function sendWeiboPhotoOne(msg, pic, caption, url) {
   }
 }
 
+function sendWeiboPhotoMultiple(msg, media_data, caption, url ) {
+  if (media_data[0].type === 'photo') {
+    media_data[0].caption = caption + "\n\n[🔗原文链接](" + url + ")";
+    media_data[0].parse_mode= 'MarkdownV2';
+  } else {
+    media_data[media_data.length-1].caption = caption + "\n\n[🔗原文链接](" + url + ")";
+    media_data[media_data.length-1].parse_mode= 'MarkdownV2';
+  }
+  if (media_data.length > 10) {
+    media_data = media_data.slice(0, 10);
+  }
+  try {
+    sendMediaGroup({
+      chat_id: msg.chat.id,
+      media: media_data,
+      reply_to_message_id: msg.message_id,
+    });
+  } catch (error) {
+    console.error(error);
+    sendWeiboPhotoOne(msg, media_data[0], caption + '\n\n_⬇️（多图获取失败，请原文查看）_', url);
+  }
+}
+
 function checkWeiboHasVideo(data) {
   if (data.status.hasOwnProperty("page_info")) {
     return data.status.page_info.type === "video";
@@ -220,5 +267,60 @@ function getWeiboVideo(data) {
   } else {
     var media = data.status.retweeted_status.page_info.media_info;
   }
-  return media.stream_url_hd;
+  if (media.stream_url_hd) {
+    return media.stream_url_hd
+  } else {
+    return media.stream_url
+  };
+}
+
+function getWeiboVideoCover(data) {
+  if (data.status.hasOwnProperty("page_info")) {
+    var page_info = data.status.page_info;
+  } else {
+    var page_info = data.status.retweeted_status.page_info;
+  }
+  return page_info.page_pic.url;
+}
+
+
+function sendWeiboFinal(msg, data, url, caption, extra_caption) {
+  if (checkWeiboHasVideo(data)) {
+
+  try {
+    //Try to send cover photo
+    sendPhoto({
+        chat_id: msg.chat.id,
+        caption: caption + extra_caption,
+        parse_mode: "MarkdownV2",
+        photo: data.status.page_info.page_pic.url,
+        reply_to_message_id: msg.message_id,
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: "原文链接",
+                url: url,
+              },
+            ],
+          ],
+        },
+      });
+    }
+    catch (error) {
+      console.error(error)
+      sendMessage({
+        chat_id: msg.chat.id,
+        text: caption + extra_caption,
+        parse_mode: 'MarkdownV2',
+        reply_to_message_id: msg.message_id,
+        reply_markup: {
+          inline_keyboard: [[{
+            text: "原文链接",
+            url: url,
+          }]],
+        },
+      });
+    }
+  }
 }

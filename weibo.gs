@@ -33,21 +33,25 @@ function processWeibo(msg, url) {
       } catch (error) {
         console.error(error);
         try {
+          var options = {
+            headers: {
+              "User-Agent": macChromeUserAgent,
+            },
+          };
           var response = UrlFetchApp.fetch(getWeiboVideo(data), options);
-            // console.log(response.getAllHeaders().Location);
-            sendVideoFile({
-              chat_id: msg.chat.id,
-              caption: caption,
-              parse_mode: 'MarkdownV2',
-              video: response.getBlob(),
-              reply_to_message_id: msg.message_id,
-              reply_markup: JSON.stringify({
-                inline_keyboard: [[{
-                  text: "原文链接",
-                  url: url,
-                }]],
-              }),
-            });  
+          sendVideoFile({
+            chat_id: String(msg.chat.id),
+            caption: caption,
+            parse_mode: 'MarkdownV2',
+            video: response.getBlob(),
+            reply_to_message_id: String(msg.message_id),
+            reply_markup: JSON.stringify({
+              inline_keyboard: [[{
+                text: "原文链接",
+                url: url,
+              }]],
+            }),
+          });      
         } catch (error) {
           console.error(error);
           sendWeiboFinal(msg, data, url, caption,'\n\n_⬇️（视频获取失败，请原文查看）_');

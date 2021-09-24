@@ -8,15 +8,18 @@ function processNga(msg, url) {
   var response = UrlFetchApp.fetch(url, options);
   var html = response.getContentText("GBK");
   var [title, content] = getNgaTextFromHtml(html);
+  var caption = constructNgaCaption(title, content);
   if (checkNgaImgExist(content)) {
-    const imgReg = /\[img\].*/g;
+    const imgReg = /\[img\][^\[]*\[\/img\]/g;
     var imgs = getNgaImagesFromText(content);
     content = content.replaceAll(imgReg, "");
+    // regen caption due to image changes
+    caption = constructNgaCaption(title, content);
     if (imgs.length == 1) {
       sendPhoto({
         chat_id: msg.chat.id,
         photo: imgs[0],
-        caption: constructNgaText(title, content),
+        caption: caption,
         parse_mode: "MarkdownV2",
         reply_to_message_id: msg.message_id,
         reply_markup: {
@@ -38,7 +41,7 @@ function processNga(msg, url) {
           media: img,
         })
       );
-      media_data[0].caption = constructNgaText(title, content) + "\n[🔗原文链接](" + url + ")",
+      media_data[0].caption = caption + "\n[🔗原文链接](" + url + ")",
       media_data[0].parse_mode = "MarkdownV2";
       if (media_data.length > 10) {
         media_data = media_data.slice(0, 10);
@@ -52,7 +55,7 @@ function processNga(msg, url) {
   } else {
     sendMessage({
       chat_id: msg.chat.id,
-      text: constructNgaText(title, content),
+      text: caption,
       parse_mode: "MarkdownV2",
       reply_to_message_id: msg.message_id,
       reply_markup: {
@@ -82,8 +85,15 @@ function getNgaTextFromHtml(html) {
   return [title, content];
 }
 
-function constructNgaText(title, content) {
-  return "*" + cleanMarkdown(title) + "*\n\n" + cleanMarkdown(content);
+function constructNgaCaption(title, content) {
+  content = cleanMarkdown(content);
+  content = content.replaceAll(cleanMarkdown('[b]'), '*').replaceAll(cleanMarkdown('[/b]'),'*');
+  content = content.replaceAll(cleanMarkdown('[i]'), '_').replaceAll(cleanMarkdown('[/i]'),'_');
+  content = content.replaceAll(cleanMarkdown('[u]'), '__').replaceAll(cleanMarkdown('[/u]'),'__');
+  content = content.replaceAll(cleanMarkdown('[del]'), '~').replaceAll(cleanMarkdown('[/del]'),'~');
+  const tag = /\\\[[^\]]*\]/g;
+  content = content.replaceAll(tag, "");
+  return "*" + cleanMarkdown(title) + "*\n\n" + content;
 }
 
 function checkNgaImgExist(text) {
@@ -94,11 +104,16 @@ function getNgaImagesFromText(text) {
   const imgReg = /\[img\][^\[]*/g;
   var imgs = text.match(imgReg);
   var response = [];
-  imgs.forEach((img) =>
-    response.push(
-      "https://img.nga.178.com/attachments" +
-        img.replace("[img].", "").replace("[/img]", "")
-    )
-  );
+  imgs.forEach((img) => {
+    img = img.replace("[img]", "").replace("[/img]", "");
+    console.log(img)
+    if (img.startsWith("http")) {
+      response.push(img);
+    } else {
+      response.push(
+        "https://img.nga.178.com/attachments" +img.substring(1)
+      );
+    }
+  });
   return response;
 }

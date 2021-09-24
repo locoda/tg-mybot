@@ -3,37 +3,20 @@ function processTiktok(msg, url) {
   // console.log(data.itemInfo.itemStruct.video.downloadAddr);
   var caption = getTiktokCaption(data);
   try {
-    var video = getTiktokVideo(data.itemInfo.itemStruct.video.downloadAddr);
-    sendVideoFile({
-      chat_id: msg.chat.id,
-      video: video,
-      caption: caption,
-      parse_mode: "MarkdownV2",
-      reply_to_message_id: msg.message_id,
-      disable_web_page_preview: true,
-      reply_markup: JSON.stringify({
-          inline_keyboard: [[{
-            text: "原文链接",
-            url: data.seoProps.metaParams.canonicalHref,
-          }]],
-        }),
-    });
-  } catch (error) {
-    console.error(error);
-    try {
-      sendPhoto({
-        chat_id: msg.chat.id,
-        photo: data.itemInfo.itemStruct.video.cover,
-        caption: caption + '\n\n_⬇️（视频获取失败，请原文查看）_',
+      var video = getTiktokVideo(data.itemInfo.itemStruct.video.downloadAddr);
+      sendVideoFile({
+        chat_id: String(msg.chat.id) ,
+        video: video,
+        caption: caption,
         parse_mode: "MarkdownV2",
-        reply_to_message_id: msg.message_id,
+        reply_to_message_id: String(msg.message_id),
         disable_web_page_preview: true,
-        reply_markup: {
+        reply_markup: JSON.stringify({
             inline_keyboard: [[{
               text: "原文链接",
               url: data.seoProps.metaParams.canonicalHref,
             }]],
-          },
+          }),
       });
     } catch (error) {
       console.error(error);
@@ -51,28 +34,30 @@ function processTiktok(msg, url) {
           },
       });
     } 
-  }
 }
 
 function getTiktokData(url) {
-  options = {
-    headers: {
-      cookie: tiktokCookieVM,
-      "User-Agent": macChromeUserAgent,
-    },
-    followRedirects: false,
-  };
-  var response = UrlFetchApp.fetch(url, options);
-  url = response.getAllHeaders().Location;
-  options = {
-    headers: {
-      cookie: tiktokCookieM,
-      "User-Agent": macChromeUserAgent,
-    },
-    followRedirects: false,
-  };
-  var response = UrlFetchApp.fetch(url, options);
-  url = response.getAllHeaders().Location.split('?')[0];
+  if (url.includes('vm.tiktok.com')) {
+    options = {
+      headers: {
+        cookie: tiktokCookieVM,
+        "User-Agent": macChromeUserAgent,
+      },
+      followRedirects: false,
+    };
+    var response = UrlFetchApp.fetch(url, options);
+    url = response.getAllHeaders().Location;
+    options = {
+      headers: {
+        cookie: tiktokCookieM,
+        "User-Agent": macChromeUserAgent,
+      },
+      followRedirects: false,
+    };
+    var response = UrlFetchApp.fetch(url, options);
+    url = response.getAllHeaders().Location
+  }
+  url = url.split('?')[0];
   options = {
     headers: {
       cookie: tiktokCookieVM,

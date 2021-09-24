@@ -1,5 +1,5 @@
 function getUrlFromText(text) {
-  var regExp = new RegExp("(http|ftp|https)://[A-Za-z0-9./?=_]*");
+  var regExp = new RegExp("(http|ftp|https)://[A-Za-z0-9./?=_@]*");
   var url = regExp.exec(text)[0];
   return url;
 }

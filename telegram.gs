@@ -30,6 +30,10 @@ function sendDocument(data) {
   request('sendDocument', data);
 }
 
+function deleteMessage(data) {
+  request('deleteMessage', data);
+}
+
 function getMyCommands() {
   request('getMyCommands');
 }
@@ -71,6 +75,7 @@ function request(api, data) {
 }
 
 function requestFile(api, data) {
+  console.log(data);
   var options = {
     'method' : 'post',
     'payload' : data,

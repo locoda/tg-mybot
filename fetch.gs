@@ -1,21 +1,24 @@
 function fetch(msg) {
-  // Check if the message is a reply, if it is, include the replied message
-  if (msg.hasOwnProperty("reply_to_message")) {
-    var text = msg.text + " " + msg.reply_to_message.text;
-  } else {
-    var text = msg.text;
-  }
   // Try to get URL from the plain text  
+  const report = checkReportNecessary(msg);
   try { 
-    var url = getUrlFromText(text);
+    var url = getUrlFromText(msg.text);
   } catch(error) {
-    console.error(error);
-    sendMessage({
-      chat_id: msg.chat.id,
-      text: "消息内无链接",
-      reply_to_message_id: msg.message_id,
-    });
-    return;
+    try {
+      url = getUrlFromText(msg.reply_to_message.text);
+      var msgToDel = msg;
+      msg = msg.reply_to_message;
+    } catch (error) {
+      console.error(error);
+      if (report) {
+        sendMessage({
+          chat_id: msg.chat.id,
+          text: "消息内无链接",
+          reply_to_message_id: msg.message_id,
+        });
+        return;
+      }
+    }
   }
   // Check URL and decide process method
   if (url.includes("m.weibo.cn") || url.includes("weibo.com") || url.includes("share.api.weibo.cn")) {
@@ -28,7 +31,6 @@ function fetch(msg) {
         text: "微博获取出错啦",
         reply_to_message_id: msg.message_id,
       });
-      return;
     }
   } else if (url.includes("xhslink.com")) {
      try {
@@ -40,7 +42,6 @@ function fetch(msg) {
         text: "小红书获取出错啦",
         reply_to_message_id: msg.message_id,
       });
-      return;
     }
   } else if (url.includes('bbs.nga.cn') || url.includes('nga.178.com') || url.includes('ngabbs.com')) {
     try {
@@ -52,9 +53,8 @@ function fetch(msg) {
         text: "NGA获取出错啦",
         reply_to_message_id: msg.message_id,
       });
-      return;
     }
-  } else if (url.includes('vm.tiktok.com')) {
+  } else if (url.includes('vm.tiktok.com') || (url.includes('www.tiktok.com') && url.includes('/video'))) {
     try {
       processTiktok(msg, url);
     } catch (error) {
@@ -64,15 +64,26 @@ function fetch(msg) {
         text: "TikTok获取出错啦",
         reply_to_message_id: msg.message_id,
       });
-      return;
     }
   } else {
     // No URL is valid for fetch
-    sendMessage({
-      chat_id: msg.chat.id,
-      text: "无可用链接",
-      reply_to_message_id: msg.message_id,
-    });
-    return;
+    if (report) {
+      sendMessage({
+        chat_id: msg.chat.id,
+        text: "无可用链接",
+        reply_to_message_id: msg.message_id,
+      });
+    }
   }
+  if (msgToDel) {
+    deleteMessage({
+      chat_id: msgToDel.chat.id,
+      message_id: msgToDel.message_id
+    });
+  }
+}
+
+
+function checkReportNecessary(msg) {
+  return msg.hasOwnProperty('entities') && msg.entities[0].type === 'bot_command';
 }

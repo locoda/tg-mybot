@@ -1,16 +1,18 @@
 function doGet(e) {
-  // return HtmlService.createHtmlOutput('乙醚的替身使者');
-  return HtmlService.createHtmlOutputFromFile('index');
+  return HtmlService.createHtmlOutput('乙醚的替身使者');
+  // return HtmlService.createHtmlOutputFromFile('index');
 }
 
 function doPost(e) {
   if(e.postData.type == "application/json") {
     var update = JSON.parse(e.postData.contents);
-    Logger.log(update);
     var msg = update.message;
+    console.log(msg);
     if (msg.hasOwnProperty('entities') && msg.entities[0].type == 'bot_command') {
       handleBotCommand(update);
-    } 
+    } else if (telegramGroupWhiteList.includes(msg.chat.id)){
+      fetch(msg);
+    }
   }
 }
 

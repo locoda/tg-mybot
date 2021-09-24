@@ -6,7 +6,9 @@ function fetch(msg) {
   } catch(error) {
     try {
       url = getUrlFromText(msg.reply_to_message.text);
-      var msgToDel = msg;
+      if (report) {
+        var msgToDel = msg;
+      }
       msg = msg.reply_to_message;
     } catch (error) {
       console.error(error);
@@ -65,7 +67,18 @@ function fetch(msg) {
         reply_to_message_id: msg.message_id,
       });
     }
-  } else {
+  } else if (url.includes('b23.tv') || url.includes('www.bilibili.com')) {
+    try {
+      processBilibili(msg, url);
+    } catch (error) {
+      console.error(error);
+      sendMessage({
+        chat_id: msg.chat.id,
+        text: "哔哩哔哩获取出错啦",
+        reply_to_message_id: msg.message_id,
+      });
+    }
+  }else {
     // No URL is valid for fetch
     if (report) {
       sendMessage({

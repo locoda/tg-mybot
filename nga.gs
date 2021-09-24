@@ -106,7 +106,6 @@ function getNgaImagesFromText(text) {
   var response = [];
   imgs.forEach((img) => {
     img = img.replace("[img]", "").replace("[/img]", "");
-    console.log(img)
     if (img.startsWith("http")) {
       response.push(img);
     } else {

@@ -1,18 +1,13 @@
 function processBilibili(msg, url) {
-  const [meta_data, video_data] = getBilibiliData(url);
-  var caption = getBilibiliCaption(meta_data);
-  var video = getBilibiliVideo(video_data.video);
+  const data = getBilibiliData(url);
+  var caption = getBilibiliCaption(data);
+  var video = getBilibiliVideo(data.bvid, data.cid);
   if (video) {
-    try {
-    var videoBlob = getBilibiliVideoBlob(video.baseUrl);
-    } catch (error) {
-      sendBilibiliCover(msg, caption, meta_data);
-    }
     sendVideoFile({
       chat_id: String(msg.chat.id) ,
-      video: videoBlob,
-      width: String(video.width),
-      height: String(video.height),
+      video: video,
+      width: String(data.dimension.width),
+      height: String(data.dimension.height),
       caption: caption,
       parse_mode: "MarkdownV2",
       reply_to_message_id: String(msg.message_id),
@@ -20,12 +15,12 @@ function processBilibili(msg, url) {
       reply_markup: JSON.stringify({
           inline_keyboard: [[{
             text: "原文链接",
-            url: "https://www.bilibili.com/video/" + meta_data.bvid,
+            url: "https://www.bilibili.com/video/" + data.bvid,
           }]],
         }),
     });
   } else {
-    sendBilibiliCover(msg, caption, meta_data);
+    sendBilibiliCover(msg, data, caption);
   }
 }
 
@@ -50,36 +45,39 @@ function getBilibiliData(url) {
   var html = response.getContentText();
   var video_data = html.split('window.__playinfo__=')[1];
   video_data = video_data.split('</script>')[0];
-  var meta_data = html.split('__INITIAL_STATE__=')[1];
-  meta_data = meta_data.split(';')[0];
-  return [JSON.parse(meta_data).videoData, JSON.parse(video_data).data.dash];
+  var data = html.split('__INITIAL_STATE__=')[1];
+  data = data.split(';(function()')[0];
+  // console.log(data);
+  return JSON.parse(data).videoData;
 }
 
-function getBilibiliVideo(data) {
-  var videos = data.filter(video => video.bandwidth < 500000 && video.mimeType === 'video/mp4');
-  return videos[0];
-}
 
 function getBilibiliCaption(data) {
   return "*" + cleanMarkdown(data.title) + "*\n\n" + cleanMarkdown(data.desc);
 }
 
-function getBilibiliVideoBlob(url) {
+function getBilibiliVideo(bvid, cid) {
   var options = {
     headers: {
       "User-Agent": macChromeUserAgent,
       "Cookie" : bilibiliCookie,
     },
   }
-  var response = UrlFetchApp.fetch(url, options);
-  return response.getBlob();
+  var response = UrlFetchApp.fetch(bilibiliVideoApi+'bvid='+bvid+'&cid='+cid+bilibiliVideoParam, options);
+  data = JSON.parse(response.getContentText()).data.durl[0]
+  options.headers['Referer'] = 'https://www.bilibili.com';
+  if (data.size / 1024 / 1024 / 8 < 40) {
+    return UrlFetchApp.fetch(data.url, options).getBlob();
+  } else {
+    return null;
+  }
 }
 
-function sendBilibiliCover(msg, caption, data){
+function sendBilibiliCover(msg, data, caption){
   sendPhoto({
       chat_id: msg.chat.id ,
       photo: data.pic,
-      caption: caption,
+      caption: caption + '\n\n_⬇️（视频获取失败，请原文查看）_',
       parse_mode: "MarkdownV2",
       reply_to_message_id: msg.message_id,
       disable_web_page_preview: true,

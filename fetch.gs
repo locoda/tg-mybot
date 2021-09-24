@@ -1,18 +1,18 @@
 function fetch(msg) {
   // Try to get URL from the plain text  
-  const report = checkReportNecessary(msg);
+  const isBotCommand = checkBotCommand(msg);
   try { 
     var url = getUrlFromText(msg.text);
   } catch(error) {
     try {
-      url = getUrlFromText(msg.reply_to_message.text);
-      if (report) {
+      if (msg.hasOwnProperty('reply_to_message')) {
+        url = getUrlFromText(msg.reply_to_message.text);
         var msgToDel = msg;
+        msg = msg.reply_to_message;
       }
-      msg = msg.reply_to_message;
     } catch (error) {
       console.error(error);
-      if (report) {
+      if (isBotCommand) {
         sendMessage({
           chat_id: msg.chat.id,
           text: "消息内无链接",
@@ -80,7 +80,7 @@ function fetch(msg) {
     }
   }else {
     // No URL is valid for fetch
-    if (report) {
+    if (isBotCommand) {
       sendMessage({
         chat_id: msg.chat.id,
         text: "无可用链接",
@@ -88,7 +88,7 @@ function fetch(msg) {
       });
     }
   }
-  if (msgToDel) {
+  if (isBotCommand && msgToDel) {
     deleteMessage({
       chat_id: msgToDel.chat.id,
       message_id: msgToDel.message_id
@@ -97,6 +97,6 @@ function fetch(msg) {
 }
 
 
-function checkReportNecessary(msg) {
+function checkBotCommand(msg) {
   return msg.hasOwnProperty('entities') && msg.entities[0].type === 'bot_command';
 }

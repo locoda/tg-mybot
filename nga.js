@@ -41,8 +41,8 @@ function processNga(msg, url) {
           media: img,
         })
       );
-      media_data[0].caption = caption + "\n[🔗原文链接](" + url + ")",
-      media_data[0].parse_mode = "MarkdownV2";
+      (media_data[0].caption = caption + "\n[🔗原文链接](" + url + ")"),
+        (media_data[0].parse_mode = "MarkdownV2");
       if (media_data.length > 10) {
         media_data = media_data.slice(0, 10);
       }
@@ -59,15 +59,15 @@ function processNga(msg, url) {
       parse_mode: "MarkdownV2",
       reply_to_message_id: msg.message_id,
       reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: "原文链接",
-                url: url,
-              },
-            ],
+        inline_keyboard: [
+          [
+            {
+              text: "原文链接",
+              url: url,
+            },
           ],
-        },
+        ],
+      },
     });
   }
 }
@@ -87,10 +87,18 @@ function getNgaTextFromHtml(html) {
 
 function constructNgaCaption(title, content) {
   content = cleanMarkdown(content);
-  content = content.replaceAll(cleanMarkdown('[b]'), '*').replaceAll(cleanMarkdown('[/b]'),'*');
-  content = content.replaceAll(cleanMarkdown('[i]'), '_').replaceAll(cleanMarkdown('[/i]'),'_');
-  content = content.replaceAll(cleanMarkdown('[u]'), '__').replaceAll(cleanMarkdown('[/u]'),'__');
-  content = content.replaceAll(cleanMarkdown('[del]'), '~').replaceAll(cleanMarkdown('[/del]'),'~');
+  content = content
+    .replaceAll(cleanMarkdown("[b]"), "*")
+    .replaceAll(cleanMarkdown("[/b]"), "*");
+  content = content
+    .replaceAll(cleanMarkdown("[i]"), "_")
+    .replaceAll(cleanMarkdown("[/i]"), "_");
+  content = content
+    .replaceAll(cleanMarkdown("[u]"), "__")
+    .replaceAll(cleanMarkdown("[/u]"), "__");
+  content = content
+    .replaceAll(cleanMarkdown("[del]"), "~")
+    .replaceAll(cleanMarkdown("[/del]"), "~");
   const tag = /\\\[[^\]]*\]/g;
   content = content.replaceAll(tag, "");
   return "*" + cleanMarkdown(title) + "*\n\n" + content;
@@ -109,9 +117,7 @@ function getNgaImagesFromText(text) {
     if (img.startsWith("http")) {
       response.push(img);
     } else {
-      response.push(
-        "https://img.nga.178.com/attachments" +img.substring(1)
-      );
+      response.push("https://img.nga.178.com/attachments" + img.substring(1));
     }
   });
   return response;

@@ -1,9 +1,9 @@
-const paramReg = /\?.*/g
+const paramReg = /\?.*/g;
 
 function processXhs(msg, url) {
   var data = getXhsData(url);
   var caption = getXhsCaption(data);
-  Logger.log(JSON.stringify(data));
+  // Logger.log(JSON.stringify(data));
   if (xhsCheckSendVideo(data)) {
     try {
       sendVideo({
@@ -24,37 +24,37 @@ function processXhs(msg, url) {
         },
       });
     } catch {
-      sendXhsFinal(msg, data, caption, '\n\n_⬇️（视频获取失败，请原文查看）_');
+      sendXhsFinal(msg, data, caption, "\n\n_⬇️（视频获取失败，请原文查看）_");
     }
   } else if (xhsCheckSendOne(data)) {
-    sendXhsFinal(msg, data, caption, '');  
+    sendXhsFinal(msg, data, caption, "");
   } else {
     try {
-    var media_data = [];
-    data.imageList.forEach((img) =>
-      media_data.push({
-        type: "photo",
-        media: "https:" + img.url,
-      })
-    );
-    media_data[0].caption =
-      caption +
-      "\n\n[🔗原文链接](https://www.xiaohongshu.com/discovery/item/" +
-      data.id +
-      ")";
-    media_data[0].parse_mode = "MarkdownV2";
-    if (media_data.length > 10) {
-      media_data = media_data.slice(0, 10);
-    }
-    Logger.log(media_data);
-    sendMediaGroup({
-      chat_id: msg.chat.id,
-      media: media_data,
-      reply_to_message_id: msg.message_id,
-    });
+      var media_data = [];
+      data.imageList.forEach((img) =>
+        media_data.push({
+          type: "photo",
+          media: "https:" + img.url,
+        })
+      );
+      media_data[0].caption =
+        caption +
+        "\n\n[🔗原文链接](https://www.xiaohongshu.com/discovery/item/" +
+        data.id +
+        ")";
+      media_data[0].parse_mode = "MarkdownV2";
+      if (media_data.length > 10) {
+        media_data = media_data.slice(0, 10);
+      }
+      Logger.log(media_data);
+      sendMediaGroup({
+        chat_id: msg.chat.id,
+        media: media_data,
+        reply_to_message_id: msg.message_id,
+      });
     } catch (error) {
       console.error(error);
-      sendXhsFinal(msg, data, caption, '\n\n_⬇️（多图获取失败，请原文查看）_');
+      sendXhsFinal(msg, data, caption, "\n\n_⬇️（多图获取失败，请原文查看）_");
     }
   }
 }
@@ -100,30 +100,30 @@ function sendXhsFinal(msg, data, caption, extra_caption) {
   //Try to send cover photo
   try {
     sendPhoto({
-        chat_id: msg.chat.id,
-        caption: caption + extra_caption,
-        parse_mode: "MarkdownV2",
-        photo: "https:" + data.cover.url,
-        reply_to_message_id: msg.message_id,
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: "原文链接",
-                url: "https://www.xiaohongshu.com/discovery/item/" + data.id,
-              },
-            ],
+      chat_id: msg.chat.id,
+      caption: caption + extra_caption,
+      parse_mode: "MarkdownV2",
+      photo: "https:" + data.cover.url,
+      reply_to_message_id: msg.message_id,
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "原文链接",
+              url: "https://www.xiaohongshu.com/discovery/item/" + data.id,
+            },
           ],
-        },
-      });
+        ],
+      },
+    });
   } catch (error) {
     console.error(error);
     // Try cover photo without params again
     try {
-    sendPhoto({
+      sendPhoto({
         chat_id: msg.chat.id,
         caption: caption + extra_caption,
-        photo: "https:" + data.cover.url.replace(paramReg, ''),
+        photo: "https:" + data.cover.url.replace(paramReg, ""),
         parse_mode: "MarkdownV2",
         reply_to_message_id: msg.message_id,
         reply_markup: {
@@ -141,24 +141,24 @@ function sendXhsFinal(msg, data, caption, extra_caption) {
       // Cannot success, we send plain text
       console.error(error);
       if (!extra_caption) {
-        extra_caption = '\n\n_⬇️（图片获取失败，请原文查看）_'
+        extra_caption = "\n\n_⬇️（图片获取失败，请原文查看）_";
       }
       sendMessage({
-          chat_id: msg.chat.id,
-          text: caption + extra_caption,
-          parse_mode: "MarkdownV2",
-          reply_to_message_id: msg.message_id,
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: "原文链接",
-                  url: "https://www.xiaohongshu.com/discovery/item/" + data.id,
-                },
-              ],
+        chat_id: msg.chat.id,
+        text: caption + extra_caption,
+        parse_mode: "MarkdownV2",
+        reply_to_message_id: msg.message_id,
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: "原文链接",
+                url: "https://www.xiaohongshu.com/discovery/item/" + data.id,
+              },
             ],
-          },
-        });
+          ],
+        },
+      });
     }
   }
 }

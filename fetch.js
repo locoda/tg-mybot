@@ -1,18 +1,27 @@
 function fetch(msg) {
-  // Try to get URL from the plain text  
-  const isBotCommand = checkBotCommand(msg);
-  try { 
+  // Try to get URL from the plain text
+  const isBotCommandResult = isBotCommand(msg);
+  try {
     var url = getUrlFromText(msg.text);
-  } catch(error) {
+  } catch (error) {
     try {
-      if (msg.hasOwnProperty('reply_to_message')) {
+      if (isBotCommandResult && msg.hasOwnProperty("reply_to_message")) {
         url = getUrlFromText(msg.reply_to_message.text);
         var msgToDel = msg;
         msg = msg.reply_to_message;
+      } else {
+        if (isBotCommandResult) {
+          sendMessage({
+            chat_id: msg.chat.id,
+            text: "消息内无链接",
+            reply_to_message_id: msg.message_id,
+          });
+        }
+        return;
       }
     } catch (error) {
       console.error(error);
-      if (isBotCommand) {
+      if (isBotCommandResult) {
         sendMessage({
           chat_id: msg.chat.id,
           text: "消息内无链接",
@@ -23,7 +32,11 @@ function fetch(msg) {
     }
   }
   // Check URL and decide process method
-  if (url.includes("m.weibo.cn") || url.includes("weibo.com") || url.includes("share.api.weibo.cn")) {
+  if (
+    url.includes("m.weibo.cn") ||
+    url.includes("weibo.com") ||
+    url.includes("share.api.weibo.cn")
+  ) {
     try {
       processWeibo(msg, url);
     } catch (error) {
@@ -35,7 +48,7 @@ function fetch(msg) {
       });
     }
   } else if (url.includes("xhslink.com")) {
-     try {
+    try {
       processXhs(msg, url);
     } catch (error) {
       console.error(error);
@@ -45,7 +58,11 @@ function fetch(msg) {
         reply_to_message_id: msg.message_id,
       });
     }
-  } else if (url.includes('bbs.nga.cn') || url.includes('nga.178.com') || url.includes('ngabbs.com')) {
+  } else if (
+    url.includes("bbs.nga.cn") ||
+    url.includes("nga.178.com") ||
+    url.includes("ngabbs.com")
+  ) {
     try {
       processNga(msg, url);
     } catch (error) {
@@ -56,7 +73,10 @@ function fetch(msg) {
         reply_to_message_id: msg.message_id,
       });
     }
-  } else if (url.includes('vm.tiktok.com') || (url.includes('www.tiktok.com') && url.includes('/video'))) {
+  } else if (
+    url.includes("vm.tiktok.com") ||
+    (url.includes("www.tiktok.com") && url.includes("/video"))
+  ) {
     try {
       processTiktok(msg, url);
     } catch (error) {
@@ -67,7 +87,7 @@ function fetch(msg) {
         reply_to_message_id: msg.message_id,
       });
     }
-  } else if (url.includes('b23.tv') || url.includes('www.bilibili.com')) {
+  } else if (url.includes("b23.tv") || url.includes("www.bilibili.com")) {
     try {
       processBilibili(msg, url);
     } catch (error) {
@@ -78,9 +98,9 @@ function fetch(msg) {
         reply_to_message_id: msg.message_id,
       });
     }
-  }else {
+  } else {
     // No URL is valid for fetch
-    if (isBotCommand) {
+    if (isBotCommandResult) {
       sendMessage({
         chat_id: msg.chat.id,
         text: "无可用链接",
@@ -88,15 +108,10 @@ function fetch(msg) {
       });
     }
   }
-  if (isBotCommand && msgToDel) {
+  if (isBotCommandResult && msgToDel) {
     deleteMessage({
       chat_id: msgToDel.chat.id,
-      message_id: msgToDel.message_id
+      message_id: msgToDel.message_id,
     });
   }
-}
-
-
-function checkBotCommand(msg) {
-  return msg.hasOwnProperty('entities') && msg.entities[0].type === 'bot_command';
 }

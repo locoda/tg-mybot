@@ -26,7 +26,9 @@ function doPost(e) {
 
     // Handle Channel Updates
     if (update.hasOwnProperty("channel_post")) {
-      handleChannelPost(update.channel_post);
+      var channel_post = update.channel_post;
+      console.info(channel_post);
+      handleChannelPost(channel_post);
       return;
     }
 

@@ -1,0 +1,39 @@
+function doGet(e) {
+  return HtmlService.createHtmlOutput();
+}
+
+function doPost(e) {
+  if (e.postData.type == "application/json") {
+    var update = JSON.parse(e.postData.contents);
+    // Handle Messages
+    if (update.hasOwnProperty("message")) {
+      var msg = update.message;
+      console.info(msg);
+      if (isBotCommand(msg)) {
+        handleBotCommand(msg);
+      } else {
+        // echo message
+        sendMessage({
+          chat_id: msg.chat.id,
+          text: msg.text,
+          reply_to_message_id: msg.message_id,
+        });
+      }
+      return;
+    }
+  }
+}
+
+function handleBotCommand(msg) {
+  var msgSplitted = msg.text.split(" ");
+  var command = msgSplitted[0].replace("/", "").replace(botName, "");
+  switch (command) {
+    case "start":
+      sendMessage({
+        chat_id: msg.chat.id,
+        text: "机器人工作中",
+      });
+      break;
+  }
+  return;
+}

@@ -61,10 +61,7 @@ function handleBotCommand(update) {
   }
   switch (command) {
     case "start":
-      sendMessage({
-        chat_id: msg.chat.id,
-        text: "是乙醚的替身，任何疑问/建议/聊天请直接找 @locoda",
-      });
+      start(msg);
       break;
     case "fetch":
       fetch(msg);

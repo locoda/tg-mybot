@@ -46,21 +46,32 @@ function updateJptv(channel_post) {
 
 function jpls(msg) {
   if (checkPrivateError(msg)) return;
-  sendMessage({
-    chat_id: msg.chat.id,
-    text: JPTV_MESSAGE + "请按键开始⬇️",
-    reply_to_message_id: msg.message_id,
-    reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: "片单",
-            callback_data: "jptv:片单",
-          },
-        ],
-      ],
-    },
-  });
+  var param = msg.text.split("@")[1];
+  switch (param) {
+    case "all":
+      sendMessage({
+        chat_id: msg.chat.id,
+        text: json2yaml(JPTV_MEDIA_LIST),
+        reply_to_message_id: msg.message_id,
+      });
+      break;
+    default:
+      sendMessage({
+        chat_id: msg.chat.id,
+        text: JPTV_MESSAGE + "请按键开始⬇️",
+        reply_to_message_id: msg.message_id,
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: "片单",
+                callback_data: "jptv:片单",
+              },
+            ],
+          ],
+        },
+      });
+  }
 }
 
 function handleJptvCallback(callback_query) {

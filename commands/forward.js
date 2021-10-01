@@ -12,7 +12,12 @@ function reply(msg) {
   }
   sendMessage({
     chat_id: msg.reply_to_message.forward_from.id,
-    text: "_\\> " + cleanMarkdown(msg.reply_to_message.text) + "_" + line + msg.text,
+    text:
+      "_\\> " +
+      cleanMarkdown(msg.reply_to_message.text) +
+      "_" +
+      line +
+      msg.text,
     parse_mode: "MarkdownV2",
   });
 }

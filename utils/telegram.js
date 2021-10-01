@@ -34,8 +34,24 @@ function sendDocument(data) {
   request("sendDocument", data);
 }
 
+function editMessageText(data) {
+  request("editMessageText", data);
+}
+
+function editMessageMedia(data) {
+  request("editMessageMedia", data);
+}
+
+function editMessageReplyMarkup(data) {
+  request("editMessageReplyMarkup", data);
+}
+
 function deleteMessage(data) {
   request("deleteMessage", data);
+}
+
+function answerCallbackQuery(data) {
+  request("answerCallbackQuery", data);
 }
 
 function getMyCommands() {

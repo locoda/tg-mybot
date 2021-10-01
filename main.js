@@ -1,6 +1,5 @@
 function doGet(e) {
   return HtmlService.createHtmlOutput("乙醚的替身使者");
-  // return HtmlService.createHtmlOutputFromFile('index');
 }
 
 function doPost(e) {
@@ -24,11 +23,25 @@ function doPost(e) {
       return;
     }
 
-    // Handle Channel Updates
+    // Handle Channel Posts
     if (update.hasOwnProperty("channel_post")) {
       var channel_post = update.channel_post;
       console.info(channel_post);
       handleChannelPost(channel_post);
+      return;
+    }
+
+    if (update.hasOwnProperty("edited_channel_post")) {
+      var channel_post = update.edited_channel_post;
+      console.info(channel_post);
+      handleEditedChannelPost(channel_post);
+      return;
+    }
+
+    if (update.hasOwnProperty("callback_query")) {
+      var callback_query = update.callback_query;
+      console.info(callback_query);
+      handleCallbackQuery(callback_query);
       return;
     }
 
@@ -68,6 +81,9 @@ function handleBotCommand(update) {
     case "j":
       jptv(msg);
       break;
+    case "jpls":
+      jpls(msg);
+      break;
   }
   return;
 }
@@ -75,7 +91,24 @@ function handleBotCommand(update) {
 function handleChannelPost(channel_post) {
   switch (channel_post.chat.username) {
     case jptvUsername:
-      insertJptv(channel_post)
+      insertJptv(channel_post);
+      break;
+  }
+}
+
+function handleEditedChannelPost(channel_post) {
+  switch (channel_post.chat.username) {
+    case jptvUsername:
+      updateJptv(channel_post);
+      break;
+  }
+}
+
+function handleCallbackQuery(callback_query) {
+  let identifier = callback_query.data.split(":")[0]
+  switch (identifier) {
+    case "jptv":
+      handleJptvCallback(channel_post);
       break;
   }
 }

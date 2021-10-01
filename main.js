@@ -108,7 +108,7 @@ function handleCallbackQuery(callback_query) {
   let identifier = callback_query.data.split(":")[0]
   switch (identifier) {
     case "jptv":
-      handleJptvCallback(channel_post);
+      handleJptvCallback(callback_query);
       break;
   }
 }

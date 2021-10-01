@@ -49,7 +49,6 @@ function jpls(msg) {
   sendMessage({
     chat_id: msg.chat.id,
     text: JPTV_MESSAGE + "请按键开始⬇️",
-    // parse_mode: "MarkdownV2",
     reply_to_message_id: msg.message_id,
     reply_markup: {
       inline_keyboard: [
@@ -65,8 +64,8 @@ function jpls(msg) {
 }
 
 function handleJptvCallback(callback_query) {
-  data = callback_query.data.split(":").slice(1);
-  let list = JPTV_MEDIA_LIST;
+  data = callback_query.data.split(":").slice(1).filter(i => (i));
+  var list = JPTV_MEDIA_LIST;
   data.forEach((i) => (list = list[i]));
   if (Array.isArray(list)) {
     var text = "获取到结果：\n" + list.join("\n");
@@ -74,7 +73,7 @@ function handleJptvCallback(callback_query) {
   } else {
     var text = "请继续选择操作⬇️";
     var buttons = [];
-    Object.keys(list).forEach((i) =>
+    Object.keys(list).sort().forEach((i) =>
       buttons.push([
         {
           text: i,
@@ -84,7 +83,7 @@ function handleJptvCallback(callback_query) {
     );
   }
 
-  if (data.length > 1) {
+  if (data.length > 0) {
     last_line = [
       {
         text: "主页",
@@ -97,9 +96,12 @@ function handleJptvCallback(callback_query) {
     ];
     buttons.push(last_line);
   }
+
+  // Getting data finished - ready to answer
   answerCallbackQuery({
     callback_query_id: callback_query.id
   })
+  // Edit the message
   editMessageText({
     chat_id: callback_query.message.chat.id,
     message_id: callback_query.message.message_id,
@@ -155,7 +157,7 @@ function forwardJptv(msg, id) {
 function helpJptv(msg) {
   sendMessage({
     chat_id: msg.chat.id,
-    text: "使用方法：\n/j <关键词> - 搜索日剧\n例如：/j 电影\n片单：/j@003 （直接点击即可）\n",
+    text: "使用方法：\n/j <关键词> - 搜索日剧\n例如：/j 电影\n\n查询片单：/jpls\n",
     reply_to_message_id: msg.message_id,
   });
 }
@@ -168,7 +170,7 @@ function aggregateJptvSearchResult(result) {
     (item) =>
       "/j@" +
       item.message_id["$numberDouble"].padStart(3, "0") +
-      "  ➡️  " +
+      " ➡️ " +
       item.text
   );
   // console.log(result);

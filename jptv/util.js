@@ -1,11 +1,11 @@
 function editJptvMedia() {
   editMessageMedia({
     chat_id: '@' + jptvUsername,
-    message_id: 595,
+    message_id: 608,
     media: {
       type: "video",
-      media: "BAACAgEAAxkBAAIFbGFXYvsrAojI1sEaGbDG0C3NwhviAAJEAgAC8AO4RjRF_Qse3ydvIQQ", // file id
-      caption: "#Byplayers3：#名配角的森林100日 ep12 #完结" // caption
+      media: "BAACAgEAAxkBAAIF_2FYE8hXWQebWdXxOh-GpFncJ1zTAAJxAgAC8APARnO5N4Gc6g4aIQQ", // file id
+      caption: "#火花 ep10 #完结" // caption
     }
   })
 }
@@ -28,8 +28,8 @@ function updateJptvTelegraph() {
     payload: JSON.stringify({
       access_token: telegraphAccessToken,
       title: "乙醚的日剧片单",
-      autor: "乙醚",
-      // author_url: "https://t.me/ethersdaily", 
+      author_name: "乙醚",
+      author_url: "https://t.me/ethersdaily", 
       content: JSON.stringify(jptv2node())
     }),
   }
@@ -71,15 +71,15 @@ function jptv2md() {
   var text = "";
 
   for (i in data) {
-    text += '*' + i + '*\n'
+    text += '*' + cleanMarkdown(i) + '*\n'
     if (Array.isArray(data[i])) {
-      data[i].forEach(item => text += '  ' + item + '\n')
+      data[i].forEach(item => text += '  ' + cleanMarkdown(item) + '\n')
     } else {
       for (j in data[i]) {
-        data[i][j].forEach(item => text += '  ' + item + '\n')
+        data[i][j].forEach(item => text += '  ' + cleanMarkdown(item) + '\n')
       }
     }
+    text += '\n'
   }
-  text += '\n'
   return text;
 }

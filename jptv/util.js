@@ -1,11 +1,11 @@
 function editJptvMedia() {
   editMessageMedia({
     chat_id: '@' + jptvUsername,
-    message_id: 608,
+    message_id: 0, // message id
     media: {
       type: "video",
-      media: "BAACAgEAAxkBAAIF_2FYE8hXWQebWdXxOh-GpFncJ1zTAAJxAgAC8APARnO5N4Gc6g4aIQQ", // file id
-      caption: "#火花 ep10 #完结" // caption
+      media: "", // file id
+      caption: "" // caption
     }
   })
 }
@@ -15,10 +15,13 @@ function setJptvMediaList() {
   scriptProperties.setProperty('JPTV_MEDIA_LIST', JSON.stringify(JPTV_MEDIA_LIST));
 }
 
-function getJptvMediaList() {
+function getJptvMediaListString() {
   var scriptProperties = PropertiesService.getScriptProperties();
-  var data = scriptProperties.getProperty('JPTV_MEDIA_LIST');
-  return JSON.parse(data);
+  return scriptProperties.getProperty('JPTV_MEDIA_LIST');
+}
+
+function getJptvMediaList() {
+  return JSON.parse(getJptvMediaListString());
 }
 
 function updateJptvTelegraph() {
@@ -29,12 +32,76 @@ function updateJptvTelegraph() {
       access_token: telegraphAccessToken,
       title: "乙醚的日剧片单",
       author_name: "乙醚",
-      author_url: "https://t.me/ethersdaily", 
+      author_url: "https://t.me/ethersdaily",
       content: JSON.stringify(jptv2node())
     }),
   }
   var response = UrlFetchApp.fetch(telegraphBaseURL, options);
   console.log(response.getContentText())
+}
+
+function insertJptv(channel_post) {
+  if (!channel_post.hasOwnProperty("video")) {
+    // not a video file post
+    return;
+  }
+  checkJptvCaptionInList(channel_post.caption);
+  var data = {
+    message_id: channel_post.message_id,
+    text: channel_post.caption,
+  };
+  var options = {
+    method: "post",
+    contentType: "application/json",
+    payload: JSON.stringify(data),
+  };
+  var response = UrlFetchApp.fetch(jptvInsertApi, options);
+  try {
+    var result = JSON.parse(response.getContentText());
+  } catch (error) {
+    console.error(error);
+    return response.getContentText();
+  }
+  console.log(result);
+  return result;
+}
+
+function updateJptv(channel_post) {
+  if (!channel_post.hasOwnProperty("video")) {
+    // not a video file post
+    return;
+  }
+  checkJptvCaptionInList(channel_post.caption);
+  var data = {
+    message_id: channel_post.message_id,
+    text: channel_post.caption,
+  };
+  var options = {
+    method: "post",
+    contentType: "application/json",
+    payload: JSON.stringify(data),
+  };
+  var response = UrlFetchApp.fetch(jptvUpdateApi, options);
+  try {
+    var result = JSON.parse(response.getContentText());
+  } catch (error) {
+    console.error(error);
+    return response.getContentText();
+  }
+  console.log(result);
+  return result;
+}
+
+function checkJptvCaptionInList(caption) {
+  var tag = caption.split(' ')[0];
+  if (!getJptvMediaListString().includes(tag)) {
+    sendMessage({
+      chat_id: telegramMasterId,
+      text: "未在片单中找到 " + tag,
+    });
+    return false;
+  }
+  return true;
 }
 
 function jptv2node() {

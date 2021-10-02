@@ -56,10 +56,10 @@ function answerCallbackQuery(data) {
 
 function setMyCommands() {
   request("setMyCommands", {
-    commands:  [ { command: 'fetch', description: '🕷️ 抓一下网页（微博/小红书/Tiktok/NGA）' },
-     { command: 'j', description: '📺 日剧搜索 🔍' },
-     { command: 'jpls', description: '📺 日剧片单 📋' } 
-     ]
+    commands: [{ command: 'fetch', description: '🕷️ 抓一下网页（微博/小红书/Tiktok/NGA）' },
+    { command: 'j', description: '📺 日剧搜索 🔍' },
+    { command: 'jpls', description: '📺 日剧片单 📋' }
+    ]
   });
 }
 

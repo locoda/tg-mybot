@@ -17,10 +17,10 @@ function editJptvPinMessage() {
           },
         ],
         [
-         {
-           text: "片单完整版 (Telegraph)",
-          url: "https://telegra.ph/%E4%B9%99%E9%86%9A%E7%9A%84%E6%97%A5%E5%89%A7%E7%89%87%E5%8D%95-10-01-2"
-         } 
+          {
+            text: "片单完整版 (Telegraph)",
+            url: "https://telegra.ph/%E4%B9%99%E9%86%9A%E7%9A%84%E6%97%A5%E5%89%A7%E7%89%87%E5%8D%95-10-01-2"
+          }
         ]
       ],
     },

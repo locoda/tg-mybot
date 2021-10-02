@@ -1,6 +1,6 @@
 function editJptvMedia() {
   editMessageMedia({
-    chat_id: '@'+jptvUsername,
+    chat_id: '@' + jptvUsername,
     message_id: 595,
     media: {
       type: "video",
@@ -11,8 +11,14 @@ function editJptvMedia() {
 }
 
 function setJptvMediaList() {
-	var scriptProperties = PropertiesService.getScriptProperties()	;
-	scriptProperties.setProperty('JPTV_MEDIA_LIST', JSON.stringify(JPTV_MEDIA_LIST));
+  var scriptProperties = PropertiesService.getScriptProperties();
+  scriptProperties.setProperty('JPTV_MEDIA_LIST', JSON.stringify(JPTV_MEDIA_LIST));
+}
+
+function getJptvMediaList() {
+  var scriptProperties = PropertiesService.getScriptProperties();
+  var data = scriptProperties.getProperty('JPTV_MEDIA_LIST');
+  return JSON.parse(data);
 }
 
 function updateJptvTelegraph() {
@@ -33,9 +39,9 @@ function updateJptvTelegraph() {
 
 function jptv2node() {
   var data = getJptvMediaList();
-  data=data["片单"];
+  data = data["片单"];
 
-  var nodes = [{tag:"a", attrs:{"href": "https://t.me/etherjptv"}, children: ["频道链接"]}, {tag:"br"}] 
+  var nodes = [{ tag: "a", attrs: { "href": "https://t.me/etherjptv" }, children: ["频道链接"] }, { tag: "br" }]
   for (i in data) {
     node = {
       tag: "h3",
@@ -50,11 +56,30 @@ function jptv2node() {
     } else {
       for (j in data[i]) {
         data[i][j].forEach(item => nodes.push({
-        tag: "p",
-        children: [item]
-      }))
+          tag: "p",
+          children: [item]
+        }))
       }
     }
   }
   return nodes;
+}
+
+function jptv2md() {
+  var data = getJptvMediaList();
+  data = data["片单"];
+  var text = "";
+
+  for (i in data) {
+    text += '*' + i + '*\n'
+    if (Array.isArray(data[i])) {
+      data[i].forEach(item => text += '  ' + item + '\n')
+    } else {
+      for (j in data[i]) {
+        data[i][j].forEach(item => text += '  ' + item + '\n')
+      }
+    }
+  }
+  text += '\n'
+  return text;
 }

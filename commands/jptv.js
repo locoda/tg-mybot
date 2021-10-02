@@ -51,7 +51,8 @@ function jpls(msg) {
     case "all":
       sendMessage({
         chat_id: msg.chat.id,
-        text: json2yaml(getJptvMediaList()),
+        text: jptv2md(),
+        parse_mode: "MarkdownV2",
         reply_to_message_id: msg.message_id,
       });
       break;

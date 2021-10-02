@@ -29,7 +29,7 @@ function getVideoFileId(msg) {
   }
   sendMessage({
     chat_id: msg.chat.id,
-    text: msg.video.file_name + '\n' +msg.video.file_id,
+    text: msg.video.file_name + '\n' + msg.video.file_id,
     reply_to_message_id: msg.message_id,
   });
 }

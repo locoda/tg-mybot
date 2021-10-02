@@ -5,12 +5,6 @@ function updateJptvMediaList() {
 	updateJptvTelegraph()
 }
 
-function getJptvMediaList() {
-	var scriptProperties = PropertiesService.getScriptProperties();
-	var data = scriptProperties.getProperty('JPTV_MEDIA_LIST');
-	return JSON.parse(data);
-}
-
 const JPTV_MESSAGE =
 	"欢迎来到乙醚的日剧收藏机器人～ \n" +
 	"许愿/安利/交流/资源反馈请通过以下任意渠道：@locoda/@ethersdaily/@yimi_bot \n\n" +
@@ -39,7 +33,7 @@ const JPTV_MEDIA_LIST = {
 				"#宽松世代又如何 （2016 春）",
 				"99.9～#刑事专门律师 （2016 春）",
 				"#卖房子的女人+SP （2016 夏）",
-        "#火花 （2016 夏）",
+				"#火花 （2016 夏）",
 				"#逃避虽可耻但有用+SP（2016 秋）",
 				"Chef～#三星校餐 （2016 秋）",
 				"#Byplayers：#如果这6名配角共同生活的话 （2017 冬）",

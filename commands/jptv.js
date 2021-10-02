@@ -51,7 +51,7 @@ function jpls(msg) {
     case "all":
       sendMessage({
         chat_id: msg.chat.id,
-        text: json2yaml(JPTV_MEDIA_LIST),
+        text: json2yaml(getJptvMediaList()),
         reply_to_message_id: msg.message_id,
       });
       break;
@@ -76,7 +76,7 @@ function jpls(msg) {
 
 function handleJptvCallback(callback_query) {
   data = callback_query.data.split(":").slice(1).filter(i => (i));
-  var list = JPTV_MEDIA_LIST;
+  var list = getJptvMediaList();
   data.forEach((i) => (list = list[i]));
   if (Array.isArray(list)) {
     var text = "获取到结果：\n" + list.join("\n");
@@ -128,7 +128,9 @@ function jptv(msg) {
   var command = msg.text.split(" ")[0];
   var searchKeywords = msg.text.split(" ").slice(1);
   var message_id = command.replace("/", "").split("@")[1];
-  if (message_id) {
+  if (command.startsWith("/start")) {
+    helpJptv(msg);
+  } else if (message_id) {
     forwardJptv(msg, parseInt(message_id));
   } else if (searchKeywords.length) {
     searchJptv(msg, searchKeywords);

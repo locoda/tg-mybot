@@ -1,5 +1,17 @@
 function doGet(e) {
-  return HtmlService.createHtmlOutput("乙醚的替身使者");
+  // var params = JSON.stringify(e);
+    // var param = e.parameter;
+
+  // return ContentService.createTextOutput(JSON.stringify(param.c));
+
+  var param = e.queryString;
+  // console.log(param.c);
+  switch (param) {
+    case "jpls":
+      return ContentService.createTextOutput(json2yaml(getJptvMediaList()));
+    default:
+      return ContentService.createTextOutput("乙醚的机器人～");
+  }
 }
 
 function doPost(e) {
@@ -16,6 +28,8 @@ function doPost(e) {
         fetch(msg);
         // ether's reply
         reply(msg);
+        // get video id
+        getVideoFileId(msg);
       } else if (shouldForward(msg)) {
         // forward non-whitelisted regular message
         forward(msg);

@@ -25,7 +25,7 @@
   function convert(obj, ret) {
     var type = getType(obj);
 
-    switch(type) {
+    switch (type) {
       case 'array':
         convertArray(obj, ret);
         break;
@@ -51,13 +51,13 @@
     if (obj.length === 0) {
       ret.push('[]');
     }
-    for (var i=0; i<obj.length; i++) {
+    for (var i = 0; i < obj.length; i++) {
 
-      var ele     = obj[i];
+      var ele = obj[i];
       var recurse = [];
       convert(ele, recurse);
 
-      for (var j=0; j<recurse.length; j++) {
+      for (var j = 0; j < recurse.length; j++) {
         ret.push((j == 0 ? "- " : spacing) + recurse[j]);
       }
     }
@@ -71,10 +71,10 @@
         convert(ele, recurse);
         var type = getType(ele);
         if (type == 'string' || type == 'null' || type == 'number' || type == 'boolean') {
-          ret.push(normalizeString(k) + ': ' +  recurse[0]);
+          ret.push(normalizeString(k) + ': ' + recurse[0]);
         } else {
           ret.push(normalizeString(k) + ': ');
-          for (var i=0; i<recurse.length; i++) {
+          for (var i = 0; i < recurse.length; i++) {
             ret.push(spacing + recurse[i]);
           }
         }
@@ -95,7 +95,7 @@
     ret.push(normalizeString(obj));
   }
 
-  self.json2yaml = function(obj) {
+  self.json2yaml = function (obj) {
     if (typeof obj == 'string') {
       obj = JSON.parse(obj);
     }

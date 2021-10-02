@@ -4,6 +4,9 @@ function start(msg) {
     case "jpls":
       jpls(msg);
       break;
+    case "jptv":
+      jptv(msg);
+      break;
     default:
       sendMessage({
         chat_id: msg.chat.id,

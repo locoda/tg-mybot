@@ -8,6 +8,7 @@ function jpls(msg) {
         text: jptv2md(),
         parse_mode: "MarkdownV2",
         reply_to_message_id: msg.message_id,
+        disable_web_page_preview: true,
       });
       break;
     default:
@@ -20,8 +21,13 @@ function jpls(msg) {
             [
               {
                 text: "片单",
-                callback_data: "jptv:片单",
+                callback_data: "jpls:片单",
+              },], [
+              {
+                text: "完整版（Telegrah ver.）",
+                url: "https://telegra.ph/%E4%B9%99%E9%86%9A%E7%9A%84%E6%97%A5%E5%89%A7%E7%89%87%E5%8D%95-10-01-2",
               },
+
             ],
           ],
         },
@@ -29,11 +35,14 @@ function jpls(msg) {
   }
 }
 
-function handleJptvCallback(callback_query) {
+function handleJplsCallback(callback_query) {
   data = callback_query.data.split(":").slice(1).filter(i => (i));
   var list = getJptvMediaList();
   data.forEach((i) => (list = list[i]));
   if (Array.isArray(list)) {
+    list = list.map(
+      item => parseJptvItemMd(item)
+    );
     var text = "获取到结果：\n" + list.join("\n");
     var buttons = [];
   } else {
@@ -43,7 +52,7 @@ function handleJptvCallback(callback_query) {
       buttons.push([
         {
           text: i,
-          callback_data: "jptv:" + data.join(":") + ":" + i,
+          callback_data: "jpls:" + data.join(":") + ":" + i,
         },
       ])
     );
@@ -53,14 +62,62 @@ function handleJptvCallback(callback_query) {
     last_line = [
       {
         text: "主页",
-        callback_data: "jptv:",
+        callback_data: "jpls:",
       },
       {
         text: "返回",
-        callback_data: "jptv:" + data.slice(0, data.length - 1).join(":"),
+        callback_data: "jpls:" + data.slice(0, data.length - 1).join(":"),
       },
     ];
-    buttons.push(last_line);
+  } else {
+    last_line = [
+      {
+        text: "完整版（Telegrah ver.）",
+        url: "https://telegra.ph/%E4%B9%99%E9%86%9A%E7%9A%84%E6%97%A5%E5%89%A7%E7%89%87%E5%8D%95-10-01-2",
+      },
+    ]
+  }
+  buttons.push(last_line);
+
+  // Getting data finished - ready to answer
+  answerCallbackQuery({
+    callback_query_id: callback_query.id
+  })
+  // Edit the message
+  editMessageText({
+    chat_id: callback_query.message.chat.id,
+    message_id: callback_query.message.message_id,
+    text: cleanMarkdown(JPTV_MESSAGE) + text,
+    parse_mode: "MarkdownV2",
+    disable_web_page_preview: true,
+    reply_markup: {
+      inline_keyboard: buttons,
+    },
+  });
+}
+
+function handleJptvCallback(callback_query) {
+  var index = parseInt(callback_query.data.slice(5));
+  var scriptProperties = PropertiesService.getScriptProperties();
+  var result = scriptProperties.getProperty('jptv:' + callback_query.message.chat.id);
+  result = JSON.parse(result);
+  var buttons = [];
+  if (index > 0) {
+    buttons.push(
+      {
+        text: "上一页",
+        callback_data: "jptv:" + (index - 10),
+      },
+    )
+  }
+
+  if (index + 10 < result.length) {
+    buttons.push(
+      {
+        text: "下一页",
+        callback_data: "jptv:" + (index + 10),
+      },
+    )
   }
 
   // Getting data finished - ready to answer
@@ -71,9 +128,9 @@ function handleJptvCallback(callback_query) {
   editMessageText({
     chat_id: callback_query.message.chat.id,
     message_id: callback_query.message.message_id,
-    text: JPTV_MESSAGE + text,
+    text: "搜索结果（" + (Math.ceil(index / 10) + 1) + "/" + (Math.floor((result.length - 1) / 10) + 1) + "）： \n" + result.slice(index, index + 10).join('\n'),
     reply_markup: {
-      inline_keyboard: buttons,
+      inline_keyboard: [buttons],
     },
   });
 }
@@ -105,12 +162,40 @@ function searchJptv(msg, searchKeywords) {
   };
   var response = UrlFetchApp.fetch(jptvSearchApi, options);
   var result = JSON.parse(response.getContentText());
-  // console.log(result);
-  sendMessage({
-    chat_id: msg.chat.id,
-    text: aggregateJptvSearchResult(result),
-    reply_to_message_id: msg.message_id,
-  });
+  console.info("Search Results: " + JSON.stringify(result));
+  result = parseJptvSearchResult(result);
+  var scriptProperties = PropertiesService.getScriptProperties();
+  scriptProperties.setProperty('jptv:' + telegramMasterId, JSON.stringify(result));
+
+  if (!result.length) {
+    sendMessage({
+      chat_id: msg.chat.id,
+      text: "没有搜索到结果，换个关键词试试？",
+      reply_to_message_id: msg.message_id,
+    });
+  } else if (result.length <= 20) {
+    sendMessage({
+      chat_id: msg.chat.id,
+      text: "搜索结果：\n" + result.join('\n'),
+      reply_to_message_id: msg.message_id,
+    });
+  } else {
+    sendMessage({
+      chat_id: msg.chat.id,
+      text: "⚠️搜索结果将在下一次搜索后过期\n\n搜索结果 （1/" + (Math.floor((result.length - 1) / 10) + 1) + "）：\n" + result.slice(0, 10).join('\n'),
+      reply_to_message_id: msg.message_id,
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "下一页",
+              callback_data: "jptv:" + 10,
+            },
+          ],
+        ],
+      },
+    });
+  }
 }
 
 function forwardJptv(msg, id) {
@@ -125,22 +210,17 @@ function forwardJptv(msg, id) {
 function helpJptv(msg) {
   sendMessage({
     chat_id: msg.chat.id,
-    text: "使用方法：\n/j <关键词> - 搜索日剧\n例如：/j 电影\n\n查询片单：/jpls\n",
+    text: "使用方法：\n/j <关键词> - 搜索日剧\n例如：/j 电影\n搜索结果只保证最新的请求正确哦～\n\n查询片单：/jpls\n",
     reply_to_message_id: msg.message_id,
   });
 }
 
-function aggregateJptvSearchResult(result) {
-  if (!result.length) {
-    return "没有搜索到结果，换个关键词试试？";
-  }
-  result = result.map(
+function parseJptvSearchResult(result) {
+  return result.map(
     (item) =>
       "/j@" +
       item.message_id["$numberDouble"].padStart(3, "0") +
       " ➡️ " +
       item.text
   );
-  // console.log(result);
-  return "搜索结果：\n" + result.join("\n");
 }

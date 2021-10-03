@@ -1,5 +1,5 @@
 function sendMessage(data) {
-  request("sendMessage", data);
+  return request("sendMessage", data);
 }
 
 function forwardMessage(data) {

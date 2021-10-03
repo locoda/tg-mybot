@@ -1,11 +1,17 @@
+// ffmpeg memos: 
+// Covert video only to x265: ffmpeg -i in.mp4 -acodec copy -c:v libx265 -crf 21 out.mp4
+// Convert audio only to aac: ffmpeg -i in.mp4 -vcodec copy -c:a aac out.mp4
+// ffmpeg -i in.mp4 -c:v libx265 -crf 21 -c:a aac out.mp4
+// loop+rename example: for i in *.mp4; do ffmpeg -i "$i" -c:v libx265 -crf 21 -preset fast -c:a aac "#桃与梅 ep${${i#【*【}%%】*}.mp4"; done
+
 function editJptvMedia() {
   editMessageMedia({
     chat_id: '@' + jptvUsername,
-    message_id: 0, // message id
+    message_id: 677,
     media: {
       type: "video",
-      media: "", // file id
-      caption: "" // caption
+      media: "BAACAgEAAxkBAAIGJGFY3BFy4BdFSLn4I81VbkSp7aDLAALkAQACRcXIRlAtjprugjUIIQQ", // file id
+      caption: "#我的姐姐 ep01" // caption
     }
   })
 }
@@ -30,9 +36,9 @@ function updateJptvTelegraph() {
     contentType: "application/json",
     payload: JSON.stringify({
       access_token: telegraphAccessToken,
-      title: "乙醚的日剧片单",
-      author_name: "乙醚",
-      author_url: "https://t.me/ethersdaily",
+      title: "乙醚的日剧私藏片单",
+      author_name: "乙醚的日剧私藏",
+      author_url: "https://t.me/etherjptv",
       content: JSON.stringify(jptv2node())
     }),
   }
@@ -93,22 +99,48 @@ function updateJptv(channel_post) {
 }
 
 function checkJptvCaptionInList(caption) {
-  var tag = caption.split(' ')[0];
+  var tag = caption.split(' ')[0].replaceAll('#', '');
   if (!getJptvMediaListString().includes(tag)) {
     sendMessage({
       chat_id: telegramMasterId,
-      text: "未在片单中找到 " + tag,
+      text: "未在片单中找到 " + tag + '\n来自：' + caption,
     });
     return false;
   }
   return true;
 }
 
+function parseJptvItemNode(item) {
+  var node = {
+    tag: "p",
+    children: [],
+  }
+  if (item.firstEp) {
+    let url = "https://t.me/" + jptvUsername + "/" + item.firstEp;
+    node.children.push(
+      {
+        tag:"a",
+        attrs: {
+          href: url
+        },
+        children: [item.name],
+      }
+    )
+  } else {
+    node.children.push(item.name)
+  }
+  if (item.year) {
+    node.children.push(' （'+item.year+'）')
+  }
+  // console.log(node);
+  return node;
+}
+
 function jptv2node() {
   var data = getJptvMediaList();
   data = data["片单"];
 
-  var nodes = [{ tag: "a", attrs: { "href": "https://t.me/etherjptv" }, children: ["频道链接"] }, { tag: "br" }]
+  var nodes = []
   for (i in data) {
     node = {
       tag: "h3",
@@ -116,20 +148,26 @@ function jptv2node() {
     }
     nodes.push(node);
     if (Array.isArray(data[i])) {
-      data[i].forEach(item => nodes.push({
-        tag: "p",
-        children: [item]
-      }))
+      data[i].forEach(item => nodes.push(parseJptvItemNode(item)))
     } else {
       for (j in data[i]) {
-        data[i][j].forEach(item => nodes.push({
-          tag: "p",
-          children: [item]
-        }))
+        data[i][j].forEach(item => nodes.push(parseJptvItemNode(item)))
       }
     }
   }
   return nodes;
+}
+
+function parseJptvItemMd(item) {
+  if (item.firstEp) {
+    text = '[' + cleanMarkdown(item.name) + '](' + "https://t.me/" + jptvUsername + "/" + item.firstEp + ') '
+  } else {
+    text = item.name
+  }
+  if (item.year) {
+    text += '（' + item.year + '）'
+  }
+  return text;
 }
 
 function jptv2md() {
@@ -140,10 +178,12 @@ function jptv2md() {
   for (i in data) {
     text += '*' + cleanMarkdown(i) + '*\n'
     if (Array.isArray(data[i])) {
-      data[i].forEach(item => text += '  ' + cleanMarkdown(item) + '\n')
+      list = data[i].map(item => parseJptvItemMd(item))
+      text += list.join('\n')
     } else {
       for (j in data[i]) {
-        data[i][j].forEach(item => text += '  ' + cleanMarkdown(item) + '\n')
+        list = data[i][j].map(item => parseJptvItemMd(item))
+        text += list.join('\n')
       }
     }
     text += '\n'

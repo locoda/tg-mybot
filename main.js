@@ -106,6 +106,9 @@ function handleEditedChannelPost(channel_post) {
 function handleCallbackQuery(callback_query) {
   let identifier = callback_query.data.split(":")[0]
   switch (identifier) {
+    case "jpls":
+      handleJplsCallback(callback_query);
+      break;
     case "jptv":
       handleJptvCallback(callback_query);
       break;

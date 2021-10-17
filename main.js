@@ -88,16 +88,19 @@ function handleBotCommand(update) {
 }
 
 function handleChannelPost(channel_post) {
-  switch (channel_post.chat.username) {
-    case jptvUsername:
+  switch (channel_post.chat.id) {
+    case jptvId:
       insertJptv(channel_post);
+      break;
+    case jptvPrivateId:
+      insertJptvPrivate(channel_post);
       break;
   }
 }
 
 function handleEditedChannelPost(channel_post) {
-  switch (channel_post.chat.username) {
-    case jptvUsername:
+  switch (channel_post.chat.id) {
+    case jptvId:
       updateJptv(channel_post);
       break;
   }

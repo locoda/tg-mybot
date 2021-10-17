@@ -31,6 +31,9 @@ function fetch(msg) {
       }
     }
   }
+  if (isMsgLastFetch(msg)) {
+    return;
+  }
   // Check URL and decide process method
   if (
     url.includes("m.weibo.cn") ||
@@ -98,6 +101,17 @@ function fetch(msg) {
         reply_to_message_id: msg.message_id,
       });
     }
+  } else if (url.includes("music.apple.com")) {
+    try {
+      processAppleMusic(msg, url);
+    } catch (error) {
+      console.error(error);
+      sendMessage({
+        chat_id: msg.chat.id,
+        text: "Apple Music 获取出错啦",
+        reply_to_message_id: msg.message_id,
+      });
+    }
   } else {
     // No URL is valid for fetch
     if (isBotCommandResult) {
@@ -108,10 +122,22 @@ function fetch(msg) {
       });
     }
   }
+  setMostRecentFetchMsg(msg);
   if (isBotCommandResult && msgToDel) {
     deleteMessage({
       chat_id: msgToDel.chat.id,
       message_id: msgToDel.message_id,
     });
   }
+}
+
+function setMostRecentFetchMsg(msg) {
+  var scriptProperties = PropertiesService.getScriptProperties();
+  scriptProperties.setProperty('fetch:' + msg.chat.id, msg.message_id.toString());
+}
+
+function isMsgLastFetch(msg) {
+  var scriptProperties = PropertiesService.getScriptProperties();
+  var lastFetch = scriptProperties.getProperty('fetch:' + msg.chat.id);
+  return lastFetch === msg.message_id.toString();
 }

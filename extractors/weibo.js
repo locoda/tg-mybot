@@ -16,12 +16,21 @@ function processWeibo(msg, url) {
       photo_data = getWeiboPhoto(data);
       sendWeiboPhoto(msg, photo_data, caption, url);
     } else if (checkWeiboHasVideo(data, caption)) {
+      let video = getWeiboVideo(data);
+      let reg = /(\d{3})x(\d{3})/
+      let result = video.match(reg);
+      if (result.length > 2) {
+        var width = parseInt(result[1])
+        var height = parseInt(result[2])
+      }
       try {
         sendVideo({
           chat_id: msg.chat.id,
           caption: caption,
           parse_mode: "MarkdownV2",
-          video: getWeiboVideo(data),
+          video: video,
+          width: width,
+          height: height,
           reply_to_message_id: msg.message_id,
           reply_markup: {
             inline_keyboard: [
@@ -42,12 +51,14 @@ function processWeibo(msg, url) {
               "User-Agent": macChromeUserAgent,
             },
           };
-          var response = UrlFetchApp.fetch(getWeiboVideo(data), options);
+          var response = UrlFetchApp.fetch(video, options);
           sendVideoFile({
             chat_id: String(msg.chat.id),
             caption: caption,
             parse_mode: "MarkdownV2",
             video: response.getBlob(),
+            width: String(width),
+            height: String(height),
             reply_to_message_id: String(msg.message_id),
             reply_markup: JSON.stringify({
               inline_keyboard: [
@@ -314,6 +325,7 @@ function getWeiboVideo(data) {
   } else {
     var media = data.status.retweeted_status.page_info.media_info;
   }
+  console.log(media);
   if (media.stream_url_hd) {
     return media.stream_url_hd;
   } else {

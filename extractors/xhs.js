@@ -68,6 +68,7 @@ function getXhsData(url) {
     followRedirects: false,
   };
   var response = UrlFetchApp.fetch(url, options);
+  // console.log(response.getAllHeaders())
   url = response.getAllHeaders().Location;
   options = {
     headers: {
@@ -76,6 +77,7 @@ function getXhsData(url) {
     },
   };
   var response = UrlFetchApp.fetch(url, options);
+  // console.log(response.getAllHeaders())
   var html = response.getContentText();
   // data in plain html
   var data = html.split("window.__INITIAL_SSR_STATE__=")[1];

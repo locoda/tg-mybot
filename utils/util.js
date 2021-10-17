@@ -26,6 +26,7 @@ function isPrivateChat(msg) {
 
 function isMentioned(msg) {
   return (
+    msg.hasOwnProperty("text") &&
     msg.text.includes(botName) &&
     msg.hasOwnProperty("entities") &&
     msg.entities.some((entity) => entity.type === "mention")

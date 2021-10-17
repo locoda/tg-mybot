@@ -7,11 +7,11 @@
 function editJptvMedia() {
   editMessageMedia({
     chat_id: '@' + jptvUsername,
-    message_id: 677,
+    message_id: 695,
     media: {
       type: "video",
-      media: "BAACAgEAAxkBAAIGJGFY3BFy4BdFSLn4I81VbkSp7aDLAALkAQACRcXIRlAtjprugjUIIQQ", // file id
-      caption: "#我的姐姐 ep01" // caption
+      media: "BAACAgEAAxkBAAIIy2Frwyh18pCmn2LcQFdc-0WXQwSqAAJ7AgACOqBgR5xL4d4LJyJqIQQ", // file id
+      caption: "#消失的初恋 ep01" // caption
     }
   })
 }
@@ -72,6 +72,32 @@ function insertJptv(channel_post) {
   return result;
 }
 
+function insertJptvPrivate(channel_post) {
+  if (!channel_post.hasOwnProperty("video")) {
+    // not a video file post
+    return;
+  }
+  // checkJptvCaptionInList(channel_post.caption);
+  var data = {
+    message_id: channel_post.message_id,
+    text: channel_post.caption,
+  };
+  var options = {
+    method: "post",
+    contentType: "application/json",
+    payload: JSON.stringify(data),
+  };
+  var response = UrlFetchApp.fetch(jptvInsertPrivateApi, options);
+  try {
+    var result = JSON.parse(response.getContentText());
+  } catch (error) {
+    console.error(error);
+    return response.getContentText();
+  }
+  console.log(result);
+  return result;
+}
+
 function updateJptv(channel_post) {
   if (!channel_post.hasOwnProperty("video")) {
     // not a video file post
@@ -119,7 +145,7 @@ function parseJptvItemNode(item) {
     let url = "https://t.me/" + jptvUsername + "/" + item.firstEp;
     node.children.push(
       {
-        tag:"a",
+        tag: "a",
         attrs: {
           href: url
         },
@@ -130,9 +156,25 @@ function parseJptvItemNode(item) {
     node.children.push(item.name)
   }
   if (item.year) {
-    node.children.push(' （'+item.year+'）')
+    node.children.push(' （' + item.year + '）')
   }
-  // console.log(node);
+  if (item.douban) {
+    node.children.push("  🔗")
+    let url = "https://movie.douban.com/subject/" + item.douban
+    let douban = {
+      tag: "i",
+      children: [
+        {
+          tag: "a",
+          attrs: {
+            href: url
+          },
+          children: ["豆瓣"],
+        }
+      ]
+    }
+    node.children.push(douban);
+  }
   return node;
 }
 

@@ -52,6 +52,7 @@ function getAppleMusicData(url) {
     };
     var response = UrlFetchApp.fetch(url, options);
     var html = response.getContentText();
+    // console.log(html)
     var data = html.split('<script type="fastboot/shoebox" id="shoebox-media-api-cache-amp-music">')[1];
     data = data.split("</script>")[0];
     data = JSON.parse(data);

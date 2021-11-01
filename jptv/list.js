@@ -574,6 +574,12 @@ const JPTV_MEDIA_LIST = {
 					firstEp: 699,
 					douban: 34863472,
 				},
+        {
+					name: "把我关起来",
+					year: "2020",
+					firstEp: 711,
+					douban: 34967154,
+				},
 			],
 			"2021-": [
 				{
@@ -599,6 +605,12 @@ const JPTV_MEDIA_LIST = {
 					year: "2021",
 					firstEp: 532,
 					douban: 35267737,
+				},
+        {
+					name: "驾驶我的车",
+					year: "2021",
+					firstEp: 710,
+					douban: 35235502,
 				},
 			],
 		},

@@ -8,7 +8,7 @@ function processNga(msg, url) {
   var response = UrlFetchApp.fetch(url, options);
   var html = response.getContentText("GBK");
   var [title, content] = getNgaTextFromHtml(html);
-  var caption = constructNgaCaption(title, content);
+  var caption = shortenCaption(constructNgaCaption(title, content));
   if (checkNgaImgExist(content)) {
     const imgReg = /\[img\][^\[]*\[\/img\]/g;
     var imgs = getNgaImagesFromText(content);

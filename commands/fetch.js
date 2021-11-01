@@ -34,6 +34,7 @@ function fetch(msg) {
   if (isMsgLastFetch(msg)) {
     return;
   }
+  setMostRecentFetchMsg(msg);
   // Check URL and decide process method
   if (
     url.includes("m.weibo.cn") ||
@@ -76,20 +77,20 @@ function fetch(msg) {
         reply_to_message_id: msg.message_id,
       });
     }
-  } else if (
-    url.includes("vm.tiktok.com") ||
-    (url.includes("www.tiktok.com") && url.includes("/video"))
-  ) {
-    try {
-      processTiktok(msg, url);
-    } catch (error) {
-      console.error(error);
-      sendMessage({
-        chat_id: msg.chat.id,
-        text: "TikTok获取出错啦",
-        reply_to_message_id: msg.message_id,
-      });
-    }
+  // } else if (
+  //   url.includes("vm.tiktok.com") ||
+  //   (url.includes("www.tiktok.com") && url.includes("/video"))
+  // ) {
+  //   try {
+  //     processTiktok(msg, url);
+  //   } catch (error) {
+  //     console.error(error);
+  //     sendMessage({
+  //       chat_id: msg.chat.id,
+  //       text: "TikTok获取出错啦",
+  //       reply_to_message_id: msg.message_id,
+  //     });
+  //   }
   } else if (url.includes("b23.tv") || url.includes("www.bilibili.com")) {
     try {
       processBilibili(msg, url);
@@ -112,6 +113,17 @@ function fetch(msg) {
         reply_to_message_id: msg.message_id,
       });
     }
+  } else if (url.includes("maps.google.com") || url.includes("goo.gl/maps")) {
+    try {
+      processGoogleMaps(msg, url);
+    } catch (error) {
+      console.error(error);
+      sendMessage({
+        chat_id: msg.chat.id,
+        text: "Google Maps 获取出错啦",
+        reply_to_message_id: msg.message_id,
+      });
+    }
   } else {
     // No URL is valid for fetch
     if (isBotCommandResult) {
@@ -122,7 +134,7 @@ function fetch(msg) {
       });
     }
   }
-  setMostRecentFetchMsg(msg);
+  
   if (isBotCommandResult && msgToDel) {
     deleteMessage({
       chat_id: msgToDel.chat.id,

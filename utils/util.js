@@ -48,7 +48,7 @@ function isForwarded(msg) {
 }
 
 function getUrlFromText(text) {
-  var regExp = new RegExp("(http|ftp|https)://[A-Za-z0-9./?=_@]*");
+  var regExp = new RegExp("(http|https)://[A-Za-z0-9./?=_@,&:\+\-]*");
   var url = regExp.exec(text)[0];
   return url;
 }
@@ -80,3 +80,11 @@ function cleanMarkdown(text) {
 }
 
 const line = "\n\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\n";
+
+function shortenCaption(text) {
+  if (text.length < 800) {
+    return text;
+  } else {
+    return text.substring(0, 800) + "……";
+  }
+}

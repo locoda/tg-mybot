@@ -95,7 +95,7 @@ function xhsCheckSendOne(data) {
 }
 
 function getXhsCaption(data) {
-  return "*" + cleanMarkdown(data.title) + "*\n\n" + cleanMarkdown(data.desc);
+  return shortenCaption("*" + cleanMarkdown(data.title) + "*\n\n" + cleanMarkdown(data.desc));
 }
 
 function sendXhsFinal(msg, data, caption, extra_caption) {

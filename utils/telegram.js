@@ -34,6 +34,11 @@ function sendDocument(data) {
   request("sendDocument", data);
 }
 
+function sendLocation(data) {
+  request("sendLocation", data);
+}
+
+
 function editMessageText(data) {
   request("editMessageText", data);
 }
@@ -56,7 +61,7 @@ function answerCallbackQuery(data) {
 
 function setMyCommands() {
   request("setMyCommands", {
-    commands: [{ command: 'fetch', description: '🕷️ 抓一下网页（微博/小红书/Tiktok/NGA）' },
+    commands: [{ command: 'fetch', description: '🕷️ 抓一下网页（微博/小红书/NGA）' },
     { command: 'j', description: '📺 日剧搜索 🔍' },
     { command: 'jpls', description: '📺 日剧片单 📋' }
     ]

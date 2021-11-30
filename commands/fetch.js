@@ -77,20 +77,20 @@ function fetch(msg) {
         reply_to_message_id: msg.message_id,
       });
     }
-  // } else if (
-  //   url.includes("vm.tiktok.com") ||
-  //   (url.includes("www.tiktok.com") && url.includes("/video"))
-  // ) {
-  //   try {
-  //     processTiktok(msg, url);
-  //   } catch (error) {
-  //     console.error(error);
-  //     sendMessage({
-  //       chat_id: msg.chat.id,
-  //       text: "TikTok获取出错啦",
-  //       reply_to_message_id: msg.message_id,
-  //     });
-  //   }
+    // } else if (
+    //   url.includes("vm.tiktok.com") ||
+    //   (url.includes("www.tiktok.com") && url.includes("/video"))
+    // ) {
+    //   try {
+    //     processTiktok(msg, url);
+    //   } catch (error) {
+    //     console.error(error);
+    //     sendMessage({
+    //       chat_id: msg.chat.id,
+    //       text: "TikTok获取出错啦",
+    //       reply_to_message_id: msg.message_id,
+    //     });
+    //   }
   } else if (url.includes("b23.tv") || url.includes("www.bilibili.com")) {
     try {
       processBilibili(msg, url);
@@ -134,7 +134,7 @@ function fetch(msg) {
       });
     }
   }
-  
+
   if (isBotCommandResult && msgToDel) {
     deleteMessage({
       chat_id: msgToDel.chat.id,

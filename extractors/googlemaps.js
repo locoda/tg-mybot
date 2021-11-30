@@ -52,21 +52,21 @@ function getGoogleMapsData(url) {
     url = response.getAllHeaders().Location;
     var ftid;
     if (url.includes('ftid=')) {
-      ftid = url.split('ftid=')[1].split('&')[0]
+        ftid = url.split('ftid=')[1].split('&')[0]
     } else {
-      ftid = url.split('!5s')[1].split('!')[0]
+        ftid = url.split('!5s')[1].split('!')[0]
     }
     url = placeDetailApi + ftid;
-    console.log(url)
+    // console.log(url)
     var response = UrlFetchApp.fetch(url)
     var data = JSON.parse(response.getContentText())
     return data.result;
 }
 
 function getGoogleMapsCaption(data) {
-  if (data.name === "1") {
-    return "Google Maps 链接";
-  } else {
-    return data.name;
-  }
+    if (data.name === "1") {
+        return "Google Maps 链接";
+    } else {
+        return data.name;
+    }
 }

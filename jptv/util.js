@@ -16,36 +16,6 @@ function editJptvMedia() {
   })
 }
 
-function setJptvMediaList() {
-  var scriptProperties = PropertiesService.getScriptProperties();
-  scriptProperties.setProperty('JPTV_MEDIA_LIST', JSON.stringify(JPTV_MEDIA_LIST));
-}
-
-function getJptvMediaListString() {
-  var scriptProperties = PropertiesService.getScriptProperties();
-  return scriptProperties.getProperty('JPTV_MEDIA_LIST');
-}
-
-function getJptvMediaList() {
-  return JSON.parse(getJptvMediaListString());
-}
-
-function updateJptvTelegraph() {
-  var options = {
-    method: "post",
-    contentType: "application/json",
-    payload: JSON.stringify({
-      access_token: telegraphAccessToken,
-      title: "乙醚的日剧私藏片单",
-      author_name: "乙醚的日剧私藏",
-      author_url: "https://t.me/etherjptv",
-      content: JSON.stringify(jptv2node())
-    }),
-  }
-  var response = UrlFetchApp.fetch(telegraphBaseURL, options);
-  console.log(response.getContentText())
-}
-
 function insertJptv(channel_post) {
   if (!channel_post.hasOwnProperty("video")) {
     // not a video file post

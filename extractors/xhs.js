@@ -72,7 +72,7 @@ function getXhsData(url) {
   url = response.getAllHeaders().Location;
   options = {
     headers: {
-      cookie: xhsCookie,
+      cookie: getXhsCookie(),
       "User-Agent": macChromeUserAgent,
     },
   };

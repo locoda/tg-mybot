@@ -62,6 +62,7 @@ function answerCallbackQuery(data) {
 function setMyCommands() {
   request("setMyCommands", {
     commands: [{ command: 'fetch', description: '🕷️ 抓一下网页（微博/小红书/NGA）' },
+    { command: 'guess', description: '📖 能不能好好说话？！' },
     { command: 'j', description: '📺 日剧搜索 🔍' },
     { command: 'jpls', description: '📺 日剧片单 📋' }
     ]

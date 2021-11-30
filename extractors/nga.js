@@ -8,7 +8,7 @@ function processNga(msg, url) {
   var response = UrlFetchApp.fetch(url, options);
   var html = response.getContentText("GBK");
   var [title, content] = getNgaTextFromHtml(html);
-  var caption = shortenCaption(constructNgaCaption(title, content));
+  var caption = constructNgaCaption(title, content);
   if (checkNgaImgExist(content)) {
     const imgReg = /\[img\][^\[]*\[\/img\]/g;
     var imgs = getNgaImagesFromText(content);
@@ -41,7 +41,7 @@ function processNga(msg, url) {
           media: img,
         })
       );
-      (media_data[0].caption = caption + "\n[🔗原文链接](" + url + ")"),
+      (media_data[0].caption = caption + "\n\n[🔗原文链接](" + url + ")"),
         (media_data[0].parse_mode = "MarkdownV2");
       if (media_data.length > 10) {
         media_data = media_data.slice(0, 10);
@@ -101,7 +101,7 @@ function constructNgaCaption(title, content) {
     .replaceAll(cleanMarkdown("[/del]"), "~");
   const tag = /\\\[[^\]]*\]/g;
   content = content.replaceAll(tag, "");
-  return "*" + cleanMarkdown(title) + "*\n\n" + content;
+  return shortenCaption("*" + cleanMarkdown(title) + "*\n\n" + content);
 }
 
 function checkNgaImgExist(text) {

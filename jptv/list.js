@@ -15,11 +15,6 @@ const JPTV_MEDIA_LIST = {
 	片单: {
 		"日剧/更新中": [
 			{
-				name: "古见同学有交流障碍症",
-				firstEp: 251,
-				douban: 35558762
-			},
-			{
 				name: "我的姐姐",
 				firstEp: 677,
 				douban: 35561830
@@ -454,6 +449,12 @@ const JPTV_MEDIA_LIST = {
 					firstEp: 687,
 					douban: 35497515,
 				},
+        {
+				name: "古见同学有交流障碍症",
+        year: "2021 秋",
+				firstEp: 251,
+				douban: 35558762
+			},
 			],
 		},
 		电影: {

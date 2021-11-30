@@ -68,6 +68,9 @@ function handleBotCommand(update) {
     case "fetch":
       fetch(msg);
       break;
+    case "guess":
+      guess(msg);
+      break;
     case "debug":
       sendMessage({
         chat_id: msg.chat.id,

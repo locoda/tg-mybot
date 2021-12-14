@@ -126,7 +126,8 @@ function constructWeiboCaption(data) {
   const htmlTags = new RegExp("<[^>]*>", "g");
   text = text.replaceAll(htmlTags, "");
   if (data.status.hasOwnProperty("retweeted_status")) {
-    const retweeted_text = data.status.retweeted_status.text.replace(
+    var retweeted_text = data.status.retweeted_status.text.replaceAll("<br />", "\n");
+    retweeted_text = retweeted_text.replaceAll(
       htmlTags,
       ""
     );
@@ -147,7 +148,7 @@ function constructWeiboCaption(data) {
       ": " +
       cleanMarkdown(text);
   }
-  return caption;
+  return decodeHtml(caption);
 }
 
 function checkWeiboHasPhoto(data) {
@@ -315,7 +316,11 @@ function checkWeiboHasVideo(data) {
     return data.status.page_info.type === "video";
   }
   if (data.status.hasOwnProperty("retweeted_status")) {
-    return data.status.retweeted_status.page_info.type === "video";
+    if (data.status.retweeted_status.hasOwnProperty("page_info")) {
+      return data.status.retweeted_status.page_info.type === "video";
+    } else {
+      return false;
+    }
   }
 }
 

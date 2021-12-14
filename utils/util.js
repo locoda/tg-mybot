@@ -88,3 +88,9 @@ function shortenCaption(text) {
     return text.substring(0, 800) + "……";
   }
 }
+
+
+function decodeHtml(text) {
+  var decode = XmlService.parse('<d>' + text + '</d>');
+  return decode.getRootElement().getText();
+}

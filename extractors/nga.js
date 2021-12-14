@@ -101,7 +101,8 @@ function constructNgaCaption(title, content) {
     .replaceAll(cleanMarkdown("[/del]"), "~");
   const tag = /\\\[[^\]]*\]/g;
   content = content.replaceAll(tag, "");
-  return shortenCaption("*" + cleanMarkdown(title) + "*\n\n" + content);
+  var caption = "*" + cleanMarkdown(title) + "*\n\n" + content;
+  return shortenCaption(decodeHtml(caption));
 }
 
 function checkNgaImgExist(text) {

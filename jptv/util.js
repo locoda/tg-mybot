@@ -7,11 +7,11 @@
 function editJptvMedia() {
   editMessageMedia({
     chat_id: '@' + jptvUsername,
-    message_id: 722,
+    message_id: 766,
     media: {
       type: "video",
-      media: "BAACAgEAAxkBAAILfWGEH4w--sfI1Okp_BFwLTkFpQZjAAJZAgACBTEgROj7ZoPiREm-IQQ", // file id
-      caption: "这是恋爱！～#不良少年与白手杖女孩～ ep05" // caption
+      media: "BAACAgEAAxkBAAIUdWG7c3u-IIy_dtAwmwt79nTckIxEAAJrAQACWz3ZRV9RlaBpnZJbIwQ", // file id
+      caption: "这是恋爱！～#不良少年与白手杖女孩～ ep10 #完结" // caption
     }
   })
 }

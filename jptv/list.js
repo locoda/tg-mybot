@@ -13,17 +13,28 @@ const JPTV_MESSAGE =
 
 function getGistJptvList() {
   var response = UrlFetchApp.fetch(jptvListGist);
-  return JSON.parse(response.getContentText());
+  var list = JSON.stringify(JSON.parse(response.getContentText()));
+  return list.match(/.{1,5000}/g);
 }
 
 function setJptvMediaList() {
   var scriptProperties = PropertiesService.getScriptProperties();
-  scriptProperties.setProperty('JPTV_MEDIA_LIST', JSON.stringify(getGistJptvList()));
+  getGistJptvList().forEach((element, index) => scriptProperties.setProperty('JPTV_MEDIA_LIST_' + index, element));
 }
 
 function getJptvMediaListString() {
   var scriptProperties = PropertiesService.getScriptProperties();
-  return scriptProperties.getProperty('JPTV_MEDIA_LIST');
+  var list = '';
+  var index = 0;
+  while (true) {
+    if (scriptProperties.getProperty('JPTV_MEDIA_LIST_' + index)) {
+      list = list + scriptProperties.getProperty('JPTV_MEDIA_LIST_' + index);
+      index += 1;
+    } else {
+      break;
+    }
+  }
+  return list;
 }
 
 function getJptvMediaList() {

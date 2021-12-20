@@ -1,5 +1,9 @@
 function doGet(e) {
-  return ContentService.createTextOutput("乙醚的机器人～");
+  var params = JSON.stringify(e);
+  if (e.parameter.hasOwnProperty('xhsCookie')) {
+    handleXhsCookie(e.parameter.xhsCookie);
+  }
+  return HtmlService.createHtmlOutput(params);
 }
 
 function doPost(e) {

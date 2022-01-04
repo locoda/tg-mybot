@@ -201,7 +201,7 @@ function searchJptv(msg, searchKeywords) {
 function forwardJptv(msg, id) {
   forwardMessage({
     chat_id: msg.chat.id,
-    from_chat_id: "@" + jptvUsername,
+    from_chat_id: jptvId,
     message_id: id,
     // reply_to_message_id: msg.message_id,
   });

@@ -6,7 +6,7 @@
 
 function editJptvMedia() {
   editMessageMedia({
-    chat_id: '@' + jptvUsername,
+    chat_id: jptvId,
     message_id: 766,
     media: {
       type: "video",

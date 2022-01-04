@@ -51,7 +51,7 @@ function fetch(msg) {
         reply_to_message_id: msg.message_id,
       });
     }
-  } else if (url.includes("xhslink.com")) {
+  } else if (url.includes("xhslink.com") || url.includes("xiaohongshu.com/discovery/item/")) {
     try {
       processXhs(msg, url);
     } catch (error) {

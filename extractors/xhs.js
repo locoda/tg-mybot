@@ -60,6 +60,7 @@ function processXhs(msg, url) {
 }
 
 function getXhsData(url) {
+  if (url.includes("xhslink.com")) {
   var options = {
     headers: {
       "User-Agent": macChromeUserAgent,
@@ -70,6 +71,7 @@ function getXhsData(url) {
   var response = UrlFetchApp.fetch(url, options);
   // console.log(response.getAllHeaders())
   url = response.getAllHeaders().Location;
+  }
   options = {
     headers: {
       cookie: getXhsCookie(),

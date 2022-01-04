@@ -1,6 +1,6 @@
 function editJptvPinMessage() {
   editMessageText({
-    chat_id: '@' + jptvUsername,
+    chat_id: jptvId,
     message_id: 3,
     text: "欢迎来到乙醚的日剧收藏频道～ \n" +
       "许愿/安利/交流/资源反馈请通过以下任意渠道：@locoda/@ethersdaily/@yimi_bot \n\n",

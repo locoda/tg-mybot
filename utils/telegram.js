@@ -34,13 +34,20 @@ function sendDocument(data) {
   request("sendDocument", data);
 }
 
+function sendDocumentFile(data) {
+  requestFile("sendDocument", data);
+}
+
 function sendLocation(data) {
   request("sendLocation", data);
 }
 
-
 function editMessageText(data) {
   request("editMessageText", data);
+}
+
+function editMessageCaption(data) {
+  request("editMessageCaption", data);
 }
 
 function editMessageMedia(data) {
@@ -59,13 +66,22 @@ function answerCallbackQuery(data) {
   request("answerCallbackQuery", data);
 }
 
+function getFile(data) {
+  request("getFile", data);
+}
+
 function setMyCommands() {
   request("setMyCommands", {
-    commands: [{ command: 'fetch', description: '🕷️ 抓一下网页（微博/小红书/NGA）' },
-    { command: 'guess', description: '📖 能不能好好说话？！' },
-    { command: 'j', description: '📺 日剧搜索 🔍' },
-    { command: 'jpls', description: '📺 日剧片单 📋' }
-    ]
+    commands: [
+      { command: "fetch", description: "🕷️ 抓一下网页（微博/小红书/NGA）" },
+      { command: "guess", description: "📖 能不能好好说话？！" },
+      {
+        command: "hotweibo",
+        description: "🔥 微博热搜 （realtimehot/socialevent/entrank）",
+      },
+      { command: "j", description: "📺 日剧搜索 🔍" },
+      { command: "jpls", description: "📺 日剧片单 📋" },
+    ],
   });
 }
 

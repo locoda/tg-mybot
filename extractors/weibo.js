@@ -1,92 +1,30 @@
 function processWeibo(msg, url) {
   url = parseWeiboUrl(url);
-  var options = {
-    headers: {
-      "User-Agent": macChromeUserAgent,
-    },
-  };
-  var response = UrlFetchApp.fetch(url, options);
-  if (response.getResponseCode() == 200) {
-    var html = response.getContentText();
-    var data = html.split("$render_data = ")[1];
-    var data = data.split("[0]")[0];
-    var data = JSON.parse(data)[0];
-    var caption = constructWeiboCaption(data);
-    if (checkWeiboHasPhoto(data)) {
-      photo_data = getWeiboPhoto(data);
-      sendWeiboPhoto(msg, photo_data, caption, url);
-    } else if (checkWeiboHasVideo(data, caption)) {
-      let video = getWeiboVideo(data);
-      let reg = /(\d{3})x(\d{3})/
-      let result = video.match(reg);
-      if (result.length > 2) {
-        var width = parseInt(result[1])
-        var height = parseInt(result[2])
-      }
-      try {
-        sendVideo({
-          chat_id: msg.chat.id,
-          caption: caption,
-          parse_mode: "MarkdownV2",
-          video: video,
-          width: width,
-          height: height,
-          reply_to_message_id: msg.message_id,
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: "原文链接",
-                  url: url,
-                },
-              ],
-            ],
-          },
-        });
-      } catch (error) {
-        console.error(error);
-        try {
-          var options = {
-            headers: {
-              "User-Agent": macChromeUserAgent,
-            },
-          };
-          var response = UrlFetchApp.fetch(video, options);
-          sendVideoFile({
-            chat_id: String(msg.chat.id),
-            caption: caption,
-            parse_mode: "MarkdownV2",
-            video: response.getBlob(),
-            width: String(width),
-            height: String(height),
-            reply_to_message_id: String(msg.message_id),
-            reply_markup: JSON.stringify({
-              inline_keyboard: [
-                [
-                  {
-                    text: "原文链接",
-                    url: url,
-                  },
-                ],
-              ],
-            }),
-          });
-        } catch (error) {
-          console.error(error);
-          sendWeiboFinal(
-            msg,
-            data,
-            url,
-            caption,
-            "\n\n_⬇️（视频获取失败，请原文查看）_"
-          );
-        }
-      }
-    } else {
-      sendMessage({
+  if (url.includes("ttarticle")) {
+    processWeiboArticle(msg, url);
+    return;
+  }
+  var data = getWeiboData(url);
+  var caption = constructWeiboCaption(data);
+  if (checkWeiboHasPhoto(data)) {
+    photo_data = getWeiboPhoto(data);
+    sendWeiboPhoto(msg, photo_data, caption, url);
+  } else if (checkWeiboHasVideo(data, caption)) {
+    let video = getWeiboVideo(data);
+    let reg = /(\d{3})x(\d{3})/;
+    let result = video.match(reg);
+    if (result.length > 2) {
+      var width = parseInt(result[1]);
+      var height = parseInt(result[2]);
+    }
+    try {
+      sendVideo({
         chat_id: msg.chat.id,
-        text: caption,
+        caption: caption,
         parse_mode: "MarkdownV2",
+        video: video,
+        width: width,
+        height: height,
         reply_to_message_id: msg.message_id,
         reply_markup: {
           inline_keyboard: [
@@ -99,18 +37,71 @@ function processWeibo(msg, url) {
           ],
         },
       });
+    } catch (error) {
+      console.error(error);
+      try {
+        var options = {
+          headers: {
+            "User-Agent": macChromeUserAgent,
+          },
+        };
+        var response = UrlFetchApp.fetch(video, options);
+        sendVideoFile({
+          chat_id: String(msg.chat.id),
+          caption: caption,
+          parse_mode: "MarkdownV2",
+          video: response.getBlob(),
+          width: String(width),
+          height: String(height),
+          reply_to_message_id: String(msg.message_id),
+          reply_markup: JSON.stringify({
+            inline_keyboard: [
+              [
+                {
+                  text: "原文链接",
+                  url: url,
+                },
+              ],
+            ],
+          }),
+        });
+      } catch (error) {
+        console.error(error);
+        sendWeiboFinal(
+          msg,
+          data,
+          url,
+          caption,
+          "\n\n_⬇️（视频获取失败，请原文查看）_"
+        );
+      }
     }
   } else {
     sendMessage({
       chat_id: msg.chat.id,
-      text: "微博读取出错啦",
+      text: caption,
+      parse_mode: "MarkdownV2",
       reply_to_message_id: msg.message_id,
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "原文链接",
+              url: url,
+            },
+          ],
+        ],
+      },
     });
-    return;
   }
 }
 
 function parseWeiboUrl(url) {
+  if (url.includes("ttarticle")) {
+    const idReg = /\d{2,}/g;
+    var id = url.match(idReg)[0];
+    return "https://weibo.com/ttarticle/p/show?id=" + id;
+  }
   if (url.includes("m.weibo.cn")) {
     return url;
   } else if (url.includes("weibo.com")) {
@@ -121,16 +112,39 @@ function parseWeiboUrl(url) {
   }
 }
 
+function getWeiboData(url) {
+  var options = {
+    headers: {
+      "User-Agent": macChromeUserAgent,
+    },
+  };
+  var response = UrlFetchApp.fetch(url, options);
+  if (response.getResponseCode() == 200) {
+    var html = response.getContentText();
+    var data = html.split("$render_data = ")[1];
+    var data = data.split("[0]")[0];
+    return JSON.parse(data)[0];
+  } else {
+    throw response.getResponseCode();
+  }
+}
+
 function constructWeiboCaption(data) {
   var text = data.status.text.replaceAll("<br />", "\n");
   const htmlTags = new RegExp("<[^>]*>", "g");
   text = text.replaceAll(htmlTags, "");
   if (data.status.hasOwnProperty("retweeted_status")) {
-    var retweeted_text = data.status.retweeted_status.text.replaceAll("<br />", "\n");
-    retweeted_text = retweeted_text.replaceAll(
-      htmlTags,
-      ""
-    );
+    if (
+      data.status.retweeted_status.hasOwnProperty("isLongText") &&
+      data.status.retweeted_status.isLongText
+    ) {
+      var retweeted_text =
+        data.status.retweeted_status.longText.longTextContent;
+    } else {
+      var retweeted_text = data.status.retweeted_status.text;
+    }
+    retweeted_text = retweeted_text.replaceAll("<br />", "\n");
+    retweeted_text = retweeted_text.replaceAll(htmlTags, "");
     var caption =
       "@" +
       cleanMarkdown(data.status.user.screen_name) +
@@ -148,7 +162,7 @@ function constructWeiboCaption(data) {
       ": " +
       cleanMarkdown(text);
   }
-  return decodeHtml(caption);
+  return decodeHtml(shortenCaption(caption));
 }
 
 function checkWeiboHasPhoto(data) {
@@ -185,9 +199,6 @@ function sendWeiboPhoto(msg, data, caption, url) {
   if (checkWeiboSendOne(media_data)) {
     if (media_data.length === 1) {
       sendWeiboPhotoOne(msg, media_data[0], caption, url);
-    } else if (media_data[0].type === "document") {
-      media_data.forEach((media) => (media.type = "document"));
-      sendWeiboPhotoMultiple(msg, media_data, caption, url);
     } else {
       sendWeiboPhotoOne(
         msg,
@@ -197,12 +208,10 @@ function sendWeiboPhoto(msg, data, caption, url) {
       );
     }
   } else {
-    media_data = media_data.filter((media) => media.type === "photo");
-    if (checkWeiboSendOne(media_data)) {
-      sendWeiboPhotoOne(msg, media_data[0], caption, url);
-    } else {
-      sendWeiboPhotoMultiple(msg, media_data, caption, url);
+    if (media_data.some((media) => media.type === "document")) {
+      media_data.forEach((media) => (media.type = "document"));
     }
+    sendWeiboPhotoMultiple(msg, media_data, caption, url);
   }
 }
 
@@ -217,11 +226,7 @@ function getWeiboPhotoMediaType(pic) {
 }
 
 function checkWeiboSendOne(data) {
-  return (
-    data.length === 1 ||
-    data[0].type === "animation" ||
-    data[0].type === "document"
-  );
+  return data.length === 1 || data[0].type === "animation";
 }
 
 function sendWeiboPhotoOne(msg, pic, caption, url) {
@@ -330,7 +335,6 @@ function getWeiboVideo(data) {
   } else {
     var media = data.status.retweeted_status.page_info.media_info;
   }
-  console.log(media);
   if (media.stream_url_hd) {
     return media.stream_url_hd;
   } else {
@@ -388,4 +392,40 @@ function sendWeiboFinal(msg, data, url, caption, extra_caption) {
       });
     }
   }
+}
+
+function processWeiboArticle(msg, url) {
+  var options = {
+    headers: {
+      "User-Agent": macChromeUserAgent,
+      cookie: weiboCookie,
+    },
+  };
+  // url = 'https://weibo.com/ttarticle/p/show?id=2309404809080861753376';
+  var response = UrlFetchApp.fetch(url, options);
+  var html = response.getContentText();
+  var title = html.split('<div class="title"')[1];
+  title = title.substring(title.indexOf(">") + 1);
+  title = title.split("</div>")[0].trim();
+  var content = html.split('<div class="WB_editor_')[1];
+  content = content.substring(content.indexOf(">") + 1);
+  content = content.split("<div ")[0];
+  // console.log(content);
+  content = content
+    .replaceAll(/<img([^>]*)>/g, "<img$1/>")
+    .replaceAll(/<br([^>]*)>/g, "<br$1/>");
+  var decode = XmlService.parse("<div>" + content + "</div>");
+  var nodes = parseDOMContent(decode.getContent(0), "WEIBO");
+  var telegraph = updateArchiveTelegraph(
+    "Weibo",
+    title,
+    url,
+    nodes.children,
+    telegraphOtherArchiveAccessToken
+  );
+  sendMessage({
+    chat_id: msg.chat.id,
+    text: title + "\n" + telegraph,
+    reply_to_message_id: msg.message_id,
+  });
 }

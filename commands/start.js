@@ -1,5 +1,5 @@
 function start(msg) {
-  var param = msg.text.split(' ')[1]
+  var param = msg.text.split(" ")[1];
   switch (param) {
     case "jpls":
       jpls(msg);

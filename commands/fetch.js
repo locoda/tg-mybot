@@ -3,6 +3,7 @@ function fetch(msg) {
   const isBotCommandResult = isBotCommand(msg);
   try {
     var url = getUrlFromText(msg.text);
+    // console.log(url)
   } catch (error) {
     try {
       if (isBotCommandResult && msg.hasOwnProperty("reply_to_message")) {
@@ -44,23 +45,28 @@ function fetch(msg) {
     try {
       processWeibo(msg, url);
     } catch (error) {
+      // throw error;
       console.error(error);
       sendMessage({
         chat_id: msg.chat.id,
         text: "微博获取出错啦",
         reply_to_message_id: msg.message_id,
       });
+      throw error;
     }
-  } else if (url.includes("xhslink.com") || url.includes("xiaohongshu.com/discovery/item/")) {
+  } else if (
+    url.includes("xhslink.com") ||
+    url.includes("xiaohongshu.com/discovery/item/")
+  ) {
     try {
       processXhs(msg, url);
     } catch (error) {
-      console.error(error);
       sendMessage({
         chat_id: msg.chat.id,
         text: "小红书获取出错啦",
         reply_to_message_id: msg.message_id,
       });
+      throw error;
     }
   } else if (
     url.includes("bbs.nga.cn") ||
@@ -76,6 +82,7 @@ function fetch(msg) {
         text: "NGA获取出错啦",
         reply_to_message_id: msg.message_id,
       });
+      throw error;
     }
     // } else if (
     //   url.includes("vm.tiktok.com") ||
@@ -113,14 +120,79 @@ function fetch(msg) {
         reply_to_message_id: msg.message_id,
       });
     }
-  } else if (url.includes("maps.google.com") || url.includes("goo.gl/maps")) {
+    // } else if (url.includes("maps.google.com") || url.includes("goo.gl/maps")) {
+    //   try {
+    //     processGoogleMaps(msg, url);
+    //   } catch (error) {
+    //     console.error(error);
+    //     sendMessage({
+    //       chat_id: msg.chat.id,
+    //       text: "Google Maps 获取出错啦",
+    //       reply_to_message_id: msg.message_id,
+    //     });
+    //   }
+  } else if (url.includes("m.okjike.com") || url.includes("web.okjike.com")) {
     try {
-      processGoogleMaps(msg, url);
+      processJike(msg, url);
     } catch (error) {
       console.error(error);
       sendMessage({
         chat_id: msg.chat.id,
-        text: "Google Maps 获取出错啦",
+        text: "即刻获取出错啦",
+        reply_to_message_id: msg.message_id,
+      });
+    }
+  } else if (
+    url.includes("m.tribe-m.jp/diary/detail") ||
+    url.includes("m.tribe-m.jp/image_diary/detail")
+  ) {
+    try {
+      processExileTribe(msg, url);
+    } catch (error) {
+      // throw error
+      console.error(error);
+      sendMessage({
+        chat_id: msg.chat.id,
+        text: "Exile Tribe 获取出错啦",
+        reply_to_message_id: msg.message_id,
+      });
+    }
+  } else if (
+    url.includes("m.ex-m.jp/diary/detail") ||
+    url.includes("m.ex-m.jp/image_diary/detail")
+  ) {
+    try {
+      processExile(msg, url);
+    } catch (error) {
+      // throw error
+      console.error(error);
+      sendMessage({
+        chat_id: msg.chat.id,
+        text: "Exile 获取出错啦",
+        reply_to_message_id: msg.message_id,
+      });
+    }
+  } else if (url.includes("archiveofourown.org/works")) {
+    try {
+      processAO3(msg, url);
+    } catch (error) {
+      // throw error
+      console.error(error);
+      sendMessage({
+        chat_id: msg.chat.id,
+        text: "AO3 获取出错啦",
+        reply_to_message_id: msg.message_id,
+      });
+    }
+  } else if (url.includes("lofter.com/post")) {
+    try {
+      processLofter(msg, url);
+    } catch (error) {
+      // throw error
+      console.error(error);
+      sendMessage({
+        chat_id: msg.chat.id,
+        text: "LOFTER 获取出错啦",
         reply_to_message_id: msg.message_id,
       });
     }
@@ -145,11 +217,14 @@ function fetch(msg) {
 
 function setMostRecentFetchMsg(msg) {
   var scriptProperties = PropertiesService.getScriptProperties();
-  scriptProperties.setProperty('fetch:' + msg.chat.id, msg.message_id.toString());
+  scriptProperties.setProperty(
+    "fetch:" + msg.chat.id,
+    msg.message_id.toString()
+  );
 }
 
 function isMsgLastFetch(msg) {
   var scriptProperties = PropertiesService.getScriptProperties();
-  var lastFetch = scriptProperties.getProperty('fetch:' + msg.chat.id);
+  var lastFetch = scriptProperties.getProperty("fetch:" + msg.chat.id);
   return lastFetch === msg.message_id.toString();
 }

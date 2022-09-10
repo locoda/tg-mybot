@@ -1,6 +1,6 @@
 function doGet(e) {
   var params = JSON.stringify(e);
-  if (e.parameter.hasOwnProperty('xhsCookie')) {
+  if (e.parameter.hasOwnProperty("xhsCookie")) {
     handleXhsCookie(e.parameter.xhsCookie);
   }
   return HtmlService.createHtmlOutput(params);
@@ -75,6 +75,9 @@ function handleBotCommand(update) {
     case "guess":
       guess(msg);
       break;
+    case "hotweibo":
+      hotweibo(msg);
+      break;
     case "debug":
       sendMessage({
         chat_id: msg.chat.id,
@@ -102,6 +105,9 @@ function handleChannelPost(channel_post) {
     case jptvPrivateId:
       insertJptvPrivate(channel_post);
       break;
+    case favId:
+      insertFav(channel_post);
+      break;
   }
 }
 
@@ -110,11 +116,14 @@ function handleEditedChannelPost(channel_post) {
     case jptvId:
       updateJptv(channel_post);
       break;
+    case favId:
+      updateFav(channel_post);
+      break;
   }
 }
 
 function handleCallbackQuery(callback_query) {
-  let identifier = callback_query.data.split(":")[0]
+  let identifier = callback_query.data.split(":")[0];
   switch (identifier) {
     case "jpls":
       handleJplsCallback(callback_query);

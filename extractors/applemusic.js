@@ -53,7 +53,9 @@ function getAppleMusicData(url) {
   var response = UrlFetchApp.fetch(url, options);
   var html = response.getContentText();
   // console.log(html)
-  var data = html.split('<script type="fastboot/shoebox" id="shoebox-media-api-cache-amp-music">')[1];
+  var data = html.split(
+    '<script type="fastboot/shoebox" id="shoebox-media-api-cache-amp-music">'
+  )[1];
   data = data.split("</script>")[0];
   data = JSON.parse(data);
   for (var key in data) {
@@ -64,10 +66,10 @@ function getAppleMusicData(url) {
   }
   data = JSON.parse(data).d[0].relationships.tracks.data;
   if (url.includes("i=")) {
-    let track = url.split('i=')[1].split('&')[0];
-    data = data.filter(d => d.id === track);
+    let track = url.split("i=")[1].split("&")[0];
+    data = data.filter((d) => d.id === track);
   } else {
-    data = data.filter(d => d.attributes.previews[0]);
+    data = data.filter((d) => d.attributes.previews[0]);
   }
   return data[0];
 }
